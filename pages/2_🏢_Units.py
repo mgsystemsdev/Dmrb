@@ -75,7 +75,8 @@ try:
         'Move-out': 'move_out',
         'Move-in': 'move_in',
         'Nvm': 'nvm',
-        'Unit': 'unit_id',
+        'Unit': 'unit_number',
+        'Unit id': 'unit_id',  # Full path like P-5 / Bld-1 / U-210
         'Phases': 'phase',
         'Building': 'building'
     }
@@ -135,7 +136,7 @@ st.divider()
 
 # --- Helper Function ---
 def build_enhanced_unit(row, tasks_df) -> dict:
-    unit_id = str(row.get('unit_id', ''))
+    unit_id = str(row.get('unit_id', ''))  # Full path
     unit_tasks = tasks_df[tasks_df.get('Unit', '') == unit_id] if not tasks_df.empty and 'Unit' in tasks_df.columns else pd.DataFrame()
     lifecycle = row.get('lifecycle_label', 'Unknown')
     status_emoji_map = {
@@ -153,7 +154,7 @@ def build_enhanced_unit(row, tasks_df) -> dict:
     days_to_ready_str = str(int(days_to_ready)) if pd.notna(days_to_ready) and days_to_ready != '' else '—'
 
     return {
-        'unit_id': unit_id,
+        'unit_id': unit_id,  # Show full path
         'status_emoji': status_emoji,
         'move_out': row.get('move_out', pd.NaT).strftime('%m/%d/%y') if pd.notna(row.get('move_out')) else '—',
         'move_in': row.get('move_in', pd.NaT).strftime('%m/%d/%y') if pd.notna(row.get('move_in')) else '—',
