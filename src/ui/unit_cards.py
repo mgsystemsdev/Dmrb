@@ -18,7 +18,7 @@ def render_enhanced_unit_row(unit: dict) -> None:
     col1, col2, col3, col4, col5, col6 = st.columns([1.5, 1, 0.8, 1, 0.8, 1])
 
     with col1:
-        st.markdown(f"<small>{unit.get('status_emoji', '🏠')} <strong>Unit {unit.get('unit_id', 'N/A')}</strong></small>", unsafe_allow_html=True)
+        st.markdown(f"<small>{unit.get('status_emoji', '🏠')} <strong>{unit.get('unit_id', 'N/A')}</strong></small>", unsafe_allow_html=True)
 
     with col2:
         st.markdown(f"<small><strong>Move Out</strong><br>{unit.get('move_out', '—')}</small>", unsafe_allow_html=True)

@@ -28,7 +28,7 @@ def render_unit_row(unit: dict) -> None:
 <div class='unit-card'>
   <div class='row-grid' style='grid-template-columns: 1.1fr 1fr 0.9fr 1fr 0.9fr 1fr;'>
     <div>
-      <div class='meta-value'>{unit['status_emoji']} Unit {unit['unit_num']}</div>
+      <div class='meta-value'>{unit['status_emoji']} {unit['unit_num']}</div>
     </div>
     <div style='text-align:center;'>
       <div class='meta-label'>Move Out</div>
