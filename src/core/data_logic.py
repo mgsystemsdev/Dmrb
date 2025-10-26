@@ -196,14 +196,23 @@ def compute_all_unit_fields(df_units: pd.DataFrame, today: object | None = None)
     # Derived columns
     t = _norm_today(today)
 
-    df["days_vacant"] = df.apply(lambda r: compute_days_vacant(r, today=t), axis=1)  # type: ignore
-    df["days_to_be_ready"] = df.apply(lambda r: compute_days_to_be_ready(r, today=t), axis=1)  # type: ignore
+    # Use Excel columns if available (DV, DTBR), otherwise calculate
+    if "days_vacant" not in df.columns or df["days_vacant"].isna().all():
+        df["days_vacant"] = df.apply(lambda r: compute_days_vacant(r, today=t), axis=1)  # type: ignore
+    
+    if "days_to_be_ready" not in df.columns or df["days_to_be_ready"].isna().all():
+        df["days_to_be_ready"] = df.apply(lambda r: compute_days_to_be_ready(r, today=t), axis=1)  # type: ignore
+    else:
+        # Excel DTBR is inverted (negative values), flip the sign
+        df["days_to_be_ready"] = df["days_to_be_ready"] * -1
+    
+    # Always compute these fields
     df["turn_level"] = df.apply(compute_turn_level, axis=1)  # type: ignore
     df["unit_blocked"] = df.apply(compute_unit_blocked, axis=1)  # type: ignore
     df["lifecycle_label"] = df.apply(compute_lifecycle_label, axis=1)  # type: ignore
     df["nvm"] = df.apply(lambda r: compute_nvm_status(r, today=t), axis=1)  # type: ignore - COMPUTED NVM STATUS
 
-    log_event("INFO", f"Computed derived fields for {len(df)} units (including NVM status).")
+    log_event("INFO", f"Computed derived fields for {len(df)} units (days_vacant/days_to_be_ready from Excel if available).")
     return df
 
 
