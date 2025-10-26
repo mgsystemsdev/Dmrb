@@ -127,7 +127,10 @@ def build_all_units(units_df: pd.DataFrame) -> List[Dict[str, Any]]:
     now = datetime.now()
 
     for _, row in units_df.iterrows():
-        unit_num = str(row.get('Unit', '')).strip()
+        # Prefer the full Unit ID when available; fall back to Unit number
+        unit_id_val = str(row.get('Unit id', '')).strip() if 'Unit id' in row else ''
+        unit_num_fallback = str(row.get('Unit', '')).strip()
+        unit_num = unit_id_val or unit_num_fallback
         if not unit_num:
             continue
 
