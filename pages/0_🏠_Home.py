@@ -6,10 +6,6 @@ Home page with community overview and module navigation.
 """
 
 import streamlit as st
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-
 from utils.styling import inject_css
 from core.logger import log_event
 from utils.constants import APP_NAME, APP_VERSION
