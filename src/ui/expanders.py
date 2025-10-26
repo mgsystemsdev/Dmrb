@@ -40,7 +40,7 @@ def render_unit_row(unit: dict) -> None:
       <div class='meta-value' style='font-weight:600;'>{unit['move_in_str']}</div>
     </div>
     <div style='text-align:center;'>
-      <div class='meta-label'>Days Ready</div>
+      <div class='meta-label'>Days to be Rented</div>
       <div class='meta-value'>{unit['days_to_be_ready']}</div>
     </div>
     <div style='text-align:center;'>
