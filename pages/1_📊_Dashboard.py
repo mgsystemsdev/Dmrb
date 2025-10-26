@@ -461,8 +461,10 @@ for idx, unit_row in units_df.iterrows():
 all_units.sort(key=lambda x: x['days_vacant_sort'], reverse=True)
 
 with st.expander(f"📋 View All Units ({len(all_units)} total)", expanded=False):
-    for unit in all_units:
+    for idx, unit in enumerate(all_units):
         render_unit_row(unit)
+        if idx < len(all_units) - 1:
+            st.divider()
 
 st.markdown('</div>', unsafe_allow_html=True)
 
