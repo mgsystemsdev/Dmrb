@@ -131,11 +131,6 @@ with col_c:
 render_section_container_end()
 st.divider()
 
-"""
-# NVM vs Lifecycle Cards: render cards if there are any NVM statuses;
-# otherwise, skip the section entirely to avoid an empty container.
-"""
-
 # Build card-style distribution by NVM status
 nvm_series = units_df.get('nvm', pd.Series(dtype=str)).fillna('').astype(str)
 lifecycle_series = units_df.get('lifecycle_label', pd.Series(dtype=str)).fillna('Not Ready').astype(str)

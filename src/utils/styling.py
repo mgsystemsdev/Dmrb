@@ -11,7 +11,7 @@ from core.logger import log_event
 
 def render_section_container_start(title: str, icon: str = "") -> None:
     """
-    Render a minimal section divider with centered title.
+    Render a minimal section divider with centered title (no container).
     
     Args:
         title: Section title text
@@ -27,13 +27,12 @@ def render_section_container_start(title: str, icon: str = "") -> None:
 <div style="text-align: center; padding: 0.25rem 0; margin: 1.5rem 0 1rem 0; border-top: 1px solid var(--gray-400); border-bottom: 1px solid var(--gray-400); background: transparent;">
     <h3 style="color: var(--gray-900); margin: 0; padding: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.5px;">{title_text}</h3>
 </div>
-<div style="background: var(--gray-100); border: 2px solid var(--gray-400); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: 2rem; box-shadow: var(--shadow-xl);">
 """, unsafe_allow_html=True)
 
 
 def render_section_container_end() -> None:
-    """Render the end of a standard section container."""
-    st.markdown('</div>', unsafe_allow_html=True)
+    """Add spacing after section content (no container to close)."""
+    pass
 
 
 def inject_css(path: str = None) -> None:
