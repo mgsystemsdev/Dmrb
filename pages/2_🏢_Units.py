@@ -81,14 +81,13 @@ try:
     column_mapping = {
         'Move-out': 'move_out',
         'Move-in': 'move_in',
-        'Nvm': 'nvm',
         'Unit': 'unit_number',
         'Unit id': 'unit_id',  # Full path like P-5 / Bld-1 / U-210
         'Phases': 'phase',
         'Building': 'building'
     }
     units_df = units_df.rename(columns=column_mapping)
-    # Keep status as-is (will be NaN if not populated in Excel)
+    # Compute all derived fields including NVM status
     units_df = compute_all_unit_fields(units_df)
 except Exception as e:
     st.error(f"Failed to load data: {e}")
@@ -110,8 +109,9 @@ st.divider()
 
 # --- KPIs ---
 # Use TOTAL_UNITS constant (1300) for calculations like Dashboard
+from utils.constants import VACANT_STATUSES
 nvm_norm = units_df['nvm'].fillna('').astype(str).str.lower()
-vacant_units = nvm_norm.isin(['vacant', 'smi']).sum()
+vacant_units = nvm_norm.isin([s.lower() for s in VACANT_STATUSES]).sum()
 occupied_units = TOTAL_UNITS - vacant_units
 occupancy_pct = (occupied_units / TOTAL_UNITS * 100) if TOTAL_UNITS else 0
 vacancy_pct = (vacant_units / TOTAL_UNITS * 100) if TOTAL_UNITS else 0

@@ -7,6 +7,7 @@ Renders nested collapsible sections for data exploration.
 """
 
 import streamlit as st
+from utils.constants import NVM_EMOJI_MAP
 
 def render_unit_row(unit: dict) -> None:
     """
@@ -17,15 +18,8 @@ def render_unit_row(unit: dict) -> None:
               move_in_str, days_to_be_ready, nvm
     """
     nvm_text = unit.get('nvm', '—')
-    nvm_emoji_map = {
-        'vacant': '🟢',
-        'smi': '🔴',
-        'notice': '📢',
-        'moving': '📦',
-        'notice + smi': '📢 + 🔴'
-    }
     nvm_normalized = str(nvm_text).lower().strip()
-    nvm_emoji = nvm_emoji_map.get(nvm_normalized, '🟢')
+    nvm_emoji = NVM_EMOJI_MAP.get(nvm_normalized, '🟢')
     
     st.markdown(f"""
 <div class='unit-card'>

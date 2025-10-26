@@ -21,7 +21,8 @@ def build_phase_overview(units_df: pd.DataFrame, today: date | None = None) -> L
     Construct Phase → Building overview with vacancy counts, move events,
     and compact unit summaries for vacant units.
 
-    Expects columns: 'Phases','Building','Unit','Nvm','Move-out','Move-in','lifecycle_label'.
+    Expects columns: 'Phases','Building','Unit','Move-out','Move-in','lifecycle_label'.
+    Note: 'nvm' is a computed column (lowercase) added by compute_all_unit_fields().
     Returns list of dicts: [{ 'phase_label', 'buildings': [...] }].
     """
     if today is None:
@@ -36,7 +37,7 @@ def build_phase_overview(units_df: pd.DataFrame, today: date | None = None) -> L
         for building in sorted(phase_units['Building'].dropna().unique(), key=str):
             building_units = phase_units[phase_units['Building'] == building].copy()
 
-            nvm_norm = normalize_nvm_series(building_units['Nvm']) if 'Nvm' in building_units.columns else pd.Series(dtype=str)
+            nvm_norm = normalize_nvm_series(building_units['nvm']) if 'nvm' in building_units.columns else pd.Series(dtype=str)
             vacant_mask = nvm_norm.isin(['vacant', 'smi']) if not nvm_norm.empty else pd.Series(False, index=building_units.index)
 
             vacant = int(vacant_mask.sum())
@@ -62,7 +63,7 @@ def build_phase_overview(units_df: pd.DataFrame, today: date | None = None) -> L
                     'move_in_str': move_in_str,
                     'days_to_be_ready': days_to_be_ready,
                     'lifecycle_label': row.get('lifecycle_label', 'Not Ready'),
-                    'nvm': row.get('Nvm', '—'),
+                    'nvm': row.get('nvm', '—'),
                 })
 
             move_events: List[str] = []
@@ -125,7 +126,7 @@ def build_all_units(units_df: pd.DataFrame) -> List[Dict[str, Any]]:
         dv = days_between(now, row.get('Move-out'))
         dr = days_between(row.get('Move-in'), now)
 
-        nvm_val = row.get('Nvm', '')
+        nvm_val = row.get('nvm', '')
         status_emoji = '🔴' if is_vacant(nvm_val) else '🟢'
 
         all_units.append({
@@ -136,7 +137,7 @@ def build_all_units(units_df: pd.DataFrame) -> List[Dict[str, Any]]:
             'days_vacant_sort': dv if dv is not None else -1,
             'move_in_str': move_in_str,
             'days_to_be_ready': dr if dr is not None else '—',
-            'nvm': row.get('Nvm', '—'),
+            'nvm': row.get('nvm', '—'),
         })
 
     # Sort by days vacant (descending - oldest first)

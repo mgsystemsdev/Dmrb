@@ -47,18 +47,17 @@ try:
     column_mapping = {
         'Move-out': 'move_out',
         'Move-in': 'move_in',
-        'Nvm': 'nvm',
         'Unit': 'unit_id',
         'Phases': 'phase',
         'Building': 'building'
     }
     units_df = units_df.rename(columns=column_mapping)
+    # Compute all derived fields including NVM status
     units_df = compute_all_unit_fields(units_df)
-    # Rename back for compatibility
+    # Rename back for compatibility (nvm is computed, stays lowercase)
     units_df = units_df.rename(columns={
         'move_out': 'Move-out',
         'move_in': 'Move-in',
-        'nvm': 'Nvm',
         'unit_id': 'Unit',
         'phase': 'Phases',
         'building': 'Building'
@@ -68,15 +67,16 @@ except Exception as e:
     st.stop()
 
 # --- Validate Required Columns ---
-required_cols = ["Nvm", "Unit", "Phases", "Building", "Move-out", "Move-in"]
+required_cols = ["Unit", "Phases", "Building", "Move-out", "Move-in"]
 missing_cols = [col for col in required_cols if col not in units_df.columns]
 if missing_cols:
     st.error(f"❌ Missing required columns: {missing_cols}")
     st.stop()
 
 # --- Vacancy Calculation ---
-nvm_normalized = units_df["Nvm"].fillna("").astype(str).str.strip().str.lower()
-vacant_units = nvm_normalized.isin(["vacant", "smi"]).sum()
+from utils.constants import VACANT_STATUSES
+nvm_normalized = units_df["nvm"].fillna("").astype(str).str.strip().str.lower()
+vacant_units = nvm_normalized.isin([s.lower() for s in VACANT_STATUSES]).sum()
 
 # --- Occupancy Calculation ---
 occupied_units = TOTAL_UNITS - vacant_units

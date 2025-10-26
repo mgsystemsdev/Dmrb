@@ -8,8 +8,16 @@ normalizes readiness / vacancy logic.
 """
 
 import pandas as pd
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from core.logger import log_event
+from utils.constants import (
+    NVM_STATUS_MOVE_IN,
+    NVM_STATUS_SMI,
+    NVM_STATUS_VACANT,
+    NVM_STATUS_NOTICE_SMI,
+    NVM_STATUS_NOTICE,
+    NVM_STATUS_BLANK
+)
 
 
 # =======================================================
@@ -103,6 +111,56 @@ def compute_lifecycle_label(row: pd.Series) -> str:
     return "Not Ready"
 
 
+def compute_nvm_status(row: pd.Series) -> str:
+    """
+    Compute NVM status based on Move-Out/Move-In dates and TODAY().
+    
+    Priority order (evaluated top to bottom):
+    1. MOVE IN - Tenant has already moved in
+    2. SMI - Unit vacant, move-in scheduled
+    3. VACANT - Unit vacant, no move-in scheduled
+    4. NOTICE + SMI - Still occupied, next tenant scheduled
+    5. NOTICE - Still occupied, tenant gave notice
+    6. blank - No status (invalid/missing dates)
+    
+    Args:
+        row: DataFrame row with move_out and move_in columns
+        
+    Returns:
+        NVM status string
+    """
+    today = _today()
+    
+    move_out = pd.to_datetime(row.get('move_out'), errors='coerce')
+    move_in = pd.to_datetime(row.get('move_in'), errors='coerce')
+    
+    mo_valid = pd.notna(move_out)
+    mi_valid = pd.notna(move_in)
+    
+    # Priority 1: MOVE IN (tenant has moved in)
+    if mi_valid and move_in <= today:
+        return NVM_STATUS_MOVE_IN
+    
+    # Priority 2: SMI (unit vacant, move-in scheduled)
+    if mo_valid and move_out <= today and mi_valid and move_in > today:
+        return NVM_STATUS_SMI
+    
+    # Priority 3: VACANT (unit vacant, no move-in scheduled)
+    if mo_valid and move_out <= today and not mi_valid:
+        return NVM_STATUS_VACANT
+    
+    # Priority 4: NOTICE + SMI (still occupied, next tenant scheduled)
+    if mo_valid and move_out > today and mi_valid and move_in > today:
+        return NVM_STATUS_NOTICE_SMI
+    
+    # Priority 5: NOTICE (still occupied, tenant gave notice)
+    if mo_valid and move_out > today and not mi_valid:
+        return NVM_STATUS_NOTICE
+    
+    # Default: blank (no valid status)
+    return NVM_STATUS_BLANK
+
+
 # =======================================================
 # 🧩  AGGREGATION WRAPPER
 # =======================================================
@@ -110,8 +168,8 @@ def compute_all_unit_fields(df_units: pd.DataFrame) -> pd.DataFrame:
     """
     Apply all per-unit computations and return
     enriched DataFrame ready for metrics.
-    Inputs: DataFrame with at least move_in/move_out/nvm/status columns (if present).
-    Outputs: Adds days_vacant, days_to_be_ready, turn_level, unit_blocked, lifecycle_label.
+    Inputs: DataFrame with at least move_in/move_out/status columns (if present).
+    Outputs: Adds days_vacant, days_to_be_ready, turn_level, unit_blocked, lifecycle_label, nvm.
     Used by: Pages (Dashboard, Units) and any aggregator in core.phase_logic.
     """
     if df_units.empty:
@@ -131,8 +189,9 @@ def compute_all_unit_fields(df_units: pd.DataFrame) -> pd.DataFrame:
     df["turn_level"] = df.apply(compute_turn_level, axis=1)  # type: ignore
     df["unit_blocked"] = df.apply(compute_unit_blocked, axis=1)  # type: ignore
     df["lifecycle_label"] = df.apply(compute_lifecycle_label, axis=1)  # type: ignore
+    df["nvm"] = df.apply(compute_nvm_status, axis=1)  # type: ignore - COMPUTED NVM STATUS
 
-    log_event("INFO", f"Computed derived fields for {len(df)} units.")
+    log_event("INFO", f"Computed derived fields for {len(df)} units (including NVM status).")
     return df
 
 

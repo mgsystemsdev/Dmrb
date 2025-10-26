@@ -7,6 +7,7 @@ Professional, compact design for Community Cloud.
 """
 
 import streamlit as st
+from utils.constants import NVM_EMOJI_MAP
 
 def render_enhanced_unit_row(unit: dict) -> None:
     """
@@ -34,14 +35,8 @@ def render_enhanced_unit_row(unit: dict) -> None:
     
     with col6:
         nvm_text = unit.get('nvm', '—')
-        nvm_emoji_map = {
-            'vacant': '🔴',
-            'smi': '🔴',
-            'notice': '📢',
-            'moving': '📦'
-        }
         nvm_normalized = str(nvm_text).lower().strip()
-        nvm_emoji = nvm_emoji_map.get(nvm_normalized, '🟢')
+        nvm_emoji = NVM_EMOJI_MAP.get(nvm_normalized, '🟢')
         st.markdown(f"<small><strong>Nvm</strong><br>{nvm_emoji} {nvm_text}</small>", unsafe_allow_html=True)
 
 def render_unit_kpi_cards(metrics: dict) -> None:
