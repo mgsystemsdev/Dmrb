@@ -64,7 +64,7 @@ def build_phase_overview(units_df: pd.DataFrame, today: date | None = None) -> L
 
                 vacant_units_list.append({
                     'unit_num': str(row.get('Unit', '')).strip(),
-                    'status_emoji': '🔴',
+                    'status_emoji': '🟢',  # Green - vacant (available)
                     'move_out_str': move_out_str,
                     'days_vacant': days_vacant,
                     'move_in_str': move_in_str,
@@ -137,7 +137,7 @@ def build_all_units(units_df: pd.DataFrame) -> List[Dict[str, Any]]:
         dr = days_between(row.get('Move-in'), now)
 
         nvm_val = row.get('nvm', '')
-        status_emoji = '🔴' if is_vacant(nvm_val) else '🟢'
+        status_emoji = '🟢' if is_vacant(nvm_val) else '🔴'  # Green = vacant, Red = occupied
 
         all_units.append({
             'unit_num': unit_num,

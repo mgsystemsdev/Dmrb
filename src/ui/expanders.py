@@ -67,7 +67,7 @@ def render_building_expander(building: dict, expanded: bool = False) -> None:
     with st.expander(building_label, expanded=expanded):
         # Vacant units section
         if building.get('vacant_units'):
-            with st.expander(f"🔴 Vacant Units ({len(building['vacant_units'])})", expanded=False):
+            with st.expander(f"🟢 Vacant Units ({len(building['vacant_units'])})", expanded=False):
                 for unit in building['vacant_units']:
                     render_unit_row(unit)
         else:

@@ -130,14 +130,14 @@ with col1:
 
 with col2:
     render_kpi_card(
-        label="🟩 Vacant Units",
+        label="🟢 Vacant Units",
         value=f"{vacant_units:,}",
         emoji=""
     )
 
 with col3:
     render_kpi_card(
-        label="🟥 Occupied Units",
+        label="🔴 Occupied Units",
         value=f"{occupied_units:,}",
         emoji=""
     )
@@ -173,7 +173,7 @@ def render_move_outs_today(context):
             move_out_date = pd.to_datetime(row.get('Move-out'), errors='coerce')
             unit = {
                 'unit_num': str(row.get('Unit', '')),
-                'status_emoji': '🟥',
+                'status_emoji': '🔴',  # Red - still occupied
                 'move_out_str': move_out_date.strftime('%m/%d/%y') if pd.notna(move_out_date) else '—',
                 'days_vacant': '—',
                 'move_in_str': '—',
@@ -200,7 +200,7 @@ def render_move_ins_tomorrow(context):
             move_in_date = pd.to_datetime(row.get('Move-in'), errors='coerce')
             unit = {
                 'unit_num': str(row.get('Unit', '')),
-                'status_emoji': '🟩',
+                'status_emoji': '🔴',  # Red - moving in (occupied)
                 'move_out_str': '—',
                 'days_vacant': '—',
                 'move_in_str': move_in_date.strftime('%m/%d/%y') if pd.notna(move_in_date) else '—',

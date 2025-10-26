@@ -34,14 +34,15 @@ NVM_STATUS_NOTICE = "NOTICE"
 NVM_STATUS_BLANK = ""
 
 # NVM Emoji Mapping (centralized)
+# Convention: 🟢 Green = Vacant (available), 🔴 Red = Occupied
 NVM_EMOJI_MAP = {
-    'move in': '🟢',
-    'smi': '🔴',
-    'vacant': '🟢',
-    'notice + smi': '📢🔴',
-    'notice': '📢',
-    'moving': '📦',
-    '': '⚪'  # blank/unknown
+    'move in': '🔴',        # Red - occupied (tenant moved in)
+    'smi': '🟢',            # Green - vacant with scheduled move-in
+    'vacant': '🟢',         # Green - vacant, no move-in scheduled
+    'notice + smi': '📢',   # Yellow - occupied, notice given, next tenant scheduled
+    'notice': '📢',         # Yellow - occupied, notice given
+    'moving': '📦',         # Box - in transition
+    '': '⚪'                # White - unknown/blank
 }
 
 # Vacancy indicators (for occupancy calculations)

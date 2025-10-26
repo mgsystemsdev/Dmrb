@@ -251,7 +251,7 @@ def render_active_units_tab(context):
 def render_nvm_tab(context):
     units_df, tasks_df = context['units_df'], context['tasks_df']
     
-    nvm_tabs = st.tabs(["📢 Notice", "🔴 Vacant", "📦 Moving"])
+    nvm_tabs = st.tabs(["📢 Notice", "🟢 Vacant", "📦 Moving"])
 
     with nvm_tabs[0]:
         # Notice = nvm contains 'notice' (includes NOTICE and NOTICE + SMI)
