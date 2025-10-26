@@ -307,7 +307,7 @@ for phase in sorted(units_df['Phases'].dropna().unique()):
     phase_units = units_df[units_df['Phases'] == phase].copy()
     
     buildings = []
-    for building in sorted(phase_units['Building'].dropna().unique()):
+    for building in sorted(phase_units['Building'].dropna().unique(), key=str):
         building_units = phase_units[phase_units['Building'] == building]
         
         # Calculate vacant/occupied
