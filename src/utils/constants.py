@@ -5,7 +5,7 @@ These values define required sheets, refresh rates, and common references.
 
 
 # 🏢 Property Configuration
-TOTAL_UNITS = 1300  # Total units in property
+TOTAL_UNITS = 1244  # Total units in property
 
 # 📊 Excel Configuration
 REQUIRED_SHEETS = ["Unit", "Task"]
