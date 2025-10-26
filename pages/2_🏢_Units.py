@@ -9,6 +9,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 import sys
 from pathlib import Path
+import re
 sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from core.data_loader import load_units_sheet, load_task_sheet
@@ -171,6 +172,24 @@ def render_units_by_hierarchy(units_subset, tasks_df, title_prefix=""):
         st.info("No units to display")
         return
 
+    # Helpers to safely handle mixed string/numeric identifiers like "Phase_5"
+    def _safe_numeric_label(value) -> str:
+        """Return a human-friendly numeric label if digits exist, else the raw string."""
+        try:
+            return str(int(value))
+        except Exception:
+            s = str(value)
+            m = re.search(r"\d+", s)
+            return m.group(0) if m else s
+
+    def _numeric_sort_key(value):
+        """Sort primarily by first integer found, else by string value."""
+        s = str(value)
+        m = re.search(r"\d+", s)
+        if m:
+            return (0, int(m.group(0)))
+        return (1, s)
+
     # Wrap in styled container matching dashboard
     st.markdown("""
 <div class="phase-section" style="background: var(--gray-100); border: 2px solid var(--gray-400); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: 2rem; box-shadow: var(--shadow-xl);">
@@ -179,12 +198,12 @@ def render_units_by_hierarchy(units_subset, tasks_df, title_prefix=""):
     st.caption(f"**{len(units_subset)} units** {title_prefix}")
     st.divider()
 
-    for phase in sorted(units_subset['phase'].dropna().unique(), key=str):
+    for phase in sorted(units_subset['phase'].dropna().unique(), key=_numeric_sort_key):
         phase_units = units_subset[units_subset['phase'] == phase]
 
         # Phase expander
-        with st.expander(f"🧱 Phase {int(phase)} — {len(phase_units)} units", expanded=False):
-            for building in sorted(phase_units['building'].dropna().unique(), key=lambda x: str(x)):
+        with st.expander(f"🧱 Phase {_safe_numeric_label(phase)} — {len(phase_units)} units", expanded=False):
+            for building in sorted(phase_units['building'].dropna().unique(), key=_numeric_sort_key):
                 building_units = phase_units[phase_units['building'] == building]
                 
                 # Calculate building stats
@@ -193,7 +212,7 @@ def render_units_by_hierarchy(units_subset, tasks_df, title_prefix=""):
                 occupied_count = len(building_units) - vacant_count
 
                 # Building expander inside phase
-                with st.expander(f"🏢 Building {int(building)} — {len(building_units)} units | 🟥 {occupied_count} occ | 🟩 {vacant_count} vac", expanded=False):
+                with st.expander(f"🏢 Building {_safe_numeric_label(building)} — {len(building_units)} units | 🟥 {occupied_count} occ | 🟩 {vacant_count} vac", expanded=False):
                     # Each unit in its own row with a subtle hairline between rows
                     for idx, (_, unit_row) in enumerate(building_units.iterrows()):
                         render_enhanced_unit_row(build_enhanced_unit(unit_row, tasks_df))

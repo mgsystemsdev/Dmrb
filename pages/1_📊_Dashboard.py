@@ -349,7 +349,8 @@ for phase in sorted(units_df['Phases'].dropna().unique(), key=str):
                 'days_vacant': days_vacant,
                 'move_in_str': move_in_str,
                 'days_to_rent': days_to_rent,
-                'lifecycle_label': lifecycle
+                'lifecycle_label': lifecycle,
+                'nvm': row.get('Nvm', '—')
             })
         
         # Move events for THIS building only
