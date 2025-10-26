@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from core.data_loader import load_units_sheet, load_task_sheet
 from core.data_logic import compute_all_unit_fields
-from utils.constants import EXCEL_FILE_PATH, TOTAL_UNITS
+from utils.constants import EXCEL_FILE_PATH, TOTAL_UNITS, NVM_EMOJI_MAP
 from ui.unit_cards import render_unit_kpi_cards
 from ui.expanders import render_unit_row
 from ui.sections import create_simple_section, render_section
@@ -131,15 +131,58 @@ with col_c:
 st.divider()
 
 # NVM vs Lifecycle Crosstab
-st.markdown("**NVM Status vs Lifecycle Distribution**")
+render_section_container_start("NVM Status vs Lifecycle Distribution", "🧩")
 
-crosstab = pd.crosstab(units_df['nvm'], units_df['lifecycle_label'], margins=True, margins_name='Total')
+# Build card-style distribution by NVM status
+nvm_series = units_df.get('nvm', pd.Series(dtype=str)).fillna('').astype(str)
+lifecycle_series = units_df.get('lifecycle_label', pd.Series(dtype=str)).fillna('Not Ready').astype(str)
 
-# Style the crosstab
-st.dataframe(
-    crosstab,
-    use_container_width=True
-)
+# Normalize for grouping
+nvm_norm = nvm_series.str.lower().str.strip()
+lifecycles = ['Ready', 'In Turn', 'Not Ready']
+
+# Preserve appearance order of NVM statuses
+seen = []
+for val in nvm_series:
+    key = str(val).lower().strip()
+    if key not in seen:
+        seen.append(key)
+
+def pretty_label(key: str) -> str:
+    raw = key.strip()
+    display = raw.upper() if raw else 'UNKNOWN'
+    emoji = NVM_EMOJI_MAP.get(key, '')
+    return f"{emoji} {display}".strip()
+
+# Render cards in rows of 3
+cards_per_row = 3
+for i in range(0, len(seen), cards_per_row):
+    batch = seen[i:i + cards_per_row]
+    cols = st.columns(len(batch), gap="small")
+    for col, status_key in zip(cols, batch):
+        with col:
+            mask = (nvm_norm == status_key)
+            total = int(mask.sum())
+            ready = int(((lifecycle_series == 'Ready') & mask).sum())
+            in_turn = int(((lifecycle_series == 'In Turn') & mask).sum())
+            not_ready = int(((lifecycle_series == 'Not Ready') & mask).sum())
+
+            st.markdown(
+                f"""
+                <div style="border: 1px solid var(--gray-400); border-radius: var(--radius-md); padding: 0.75rem; background: var(--gray-050);">
+                    <div style="font-weight: 700; color: var(--gray-900); margin-bottom: 0.5rem;">{pretty_label(status_key)}</div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+                        <div><div style="font-size: 0.75rem; color: var(--gray-700);">Ready</div><div style="font-weight:700;">{ready}</div></div>
+                        <div><div style="font-size: 0.75rem; color: var(--gray-700);">In Turn</div><div style="font-weight:700;">{in_turn}</div></div>
+                        <div><div style="font-size: 0.75rem; color: var(--gray-700);">Not Ready</div><div style="font-weight:700;">{not_ready}</div></div>
+                        <div><div style="font-size: 0.75rem; color: var(--gray-700);">Total</div><div style="font-weight:700;">{total}</div></div>
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+
+render_section_container_end()
 
 render_section_container_end()
 

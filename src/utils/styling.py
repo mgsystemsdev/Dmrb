@@ -11,7 +11,7 @@ from core.logger import log_event
 
 def render_section_container_start(title: str, icon: str = "") -> None:
     """
-    Render the start of a standard section container.
+    Render a minimal section divider with centered title.
     
     Args:
         title: Section title text
@@ -24,8 +24,10 @@ def render_section_container_start(title: str, icon: str = "") -> None:
     """
     title_text = f"{icon} {title}" if icon else title
     st.markdown(f"""
+<div style="text-align: center; padding: 0.25rem 0; margin: 1.5rem 0 1rem 0; border-top: 1px solid var(--gray-400); border-bottom: 1px solid var(--gray-400); background: transparent;">
+    <h3 style="color: var(--gray-900); margin: 0; padding: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: 0.5px;">{title_text}</h3>
+</div>
 <div style="background: var(--gray-100); border: 2px solid var(--gray-400); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: 2rem; box-shadow: var(--shadow-xl);">
-    <h3 style="color: var(--gray-900); margin-top: 0; margin-bottom: 1.25rem; font-size: 1.5rem;">{title_text}</h3>
 """, unsafe_allow_html=True)
 
 
