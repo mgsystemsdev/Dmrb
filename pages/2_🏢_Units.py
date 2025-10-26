@@ -136,8 +136,7 @@ crosstab = pd.crosstab(units_df['nvm'], units_df['lifecycle_label'], margins=Tru
 # Style the crosstab
 st.dataframe(
     crosstab,
-    use_container_width=True,
-    height=None
+    use_container_width=True
 )
 
 render_section_container_end()
