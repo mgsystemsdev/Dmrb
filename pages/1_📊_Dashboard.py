@@ -114,7 +114,7 @@ st.markdown("""
     Operational Dashboard
 </div>
 """, unsafe_allow_html=True)
-st.divider()
+
 
 # --- KPI Section ---
 render_section_container_start("Key Performance Indicators", "📊")
