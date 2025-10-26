@@ -3,6 +3,7 @@ task_logic.py
 ---------------------------------------------------------
 Task processing logic for DMRB Dashboard.
 Handles task filtering, parsing Unit IDs, and grouping.
+Used by: Dashboard page (Walk of the Day) and task UI components.
 ---------------------------------------------------------
 """
 
@@ -14,12 +15,10 @@ from typing import Dict, List, Tuple
 def parse_unit_id(unit_id: str) -> Tuple[str, str, str]:
     """
     Parse Unit ID string into Phase, Building, Unit.
-    
-    Args:
-        unit_id: String like "P-5 / Bld-1 / U-210"
-    
-    Returns:
-        Tuple of (phase, building, unit)
+
+    Inputs: unit_id like "P-5 / Bld-1 / U-210".
+    Outputs: (phase, building, unit) as strings.
+    Used by: get_tasks_for_date() to enrich task rows for UI grouping.
     """
     try:
         parts = unit_id.split('/')
@@ -34,13 +33,10 @@ def parse_unit_id(unit_id: str) -> Tuple[str, str, str]:
 def get_tasks_for_date(tasks_df: pd.DataFrame, target_date: datetime.date) -> Dict[str, pd.DataFrame]:
     """
     Get all tasks with dates matching target_date, grouped by task type.
-    
-    Args:
-        tasks_df: Task sheet DataFrame
-        target_date: Date to filter for
-    
-    Returns:
-        Dictionary mapping task type name to filtered DataFrame
+
+    Inputs: tasks_df (raw Task sheet), target_date (python date).
+    Outputs: Dict[str, DataFrame] keyed by task type, with Phase/Building/Unit columns added.
+    Used by: get_yesterday_tasks, Dashboard page.
     """
     # Define task types and their date columns
     task_types = {
@@ -78,12 +74,10 @@ def get_tasks_for_date(tasks_df: pd.DataFrame, target_date: datetime.date) -> Di
 def get_yesterday_tasks(tasks_df: pd.DataFrame) -> Dict[str, pd.DataFrame]:
     """
     Get all tasks due yesterday.
-    
-    Args:
-        tasks_df: Task sheet DataFrame
-    
-    Returns:
-        Dictionary mapping task type to tasks due yesterday
+
+    Inputs: tasks_df (raw Task sheet).
+    Outputs: Dict[str, DataFrame] for tasks matching yesterday's date per type.
+    Used by: Dashboard Walk of the Day.
     """
     yesterday = datetime.now().date() - timedelta(days=1)
     return get_tasks_for_date(tasks_df, yesterday)
@@ -92,12 +86,10 @@ def get_yesterday_tasks(tasks_df: pd.DataFrame) -> Dict[str, pd.DataFrame]:
 def group_tasks_by_hierarchy(tasks: pd.DataFrame) -> Dict[str, Dict[str, List[Dict]]]:
     """
     Group tasks by Phase → Building → Unit hierarchy.
-    
-    Args:
-        tasks: DataFrame with Phase, Building, Unit columns
-    
-    Returns:
-        Nested dict: {phase: {building: [units]}}
+
+    Inputs: DataFrame with Phase, Building, Unit columns present.
+    Outputs: Nested dict {phase: {building: [units]}} for UI rendering.
+    Used by: ui.task_cards.render_all_tasks.
     """
     hierarchy = {}
     

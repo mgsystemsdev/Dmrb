@@ -13,14 +13,16 @@ def render_unit_row(unit: dict) -> None:
     Render a single, compact unit row with Nvm at the end.
 
     Args:
-        unit: Dictionary with keys: unit_num, status_emoji, move_out_str, days_vacant, move_in_str, days_to_rent, nvm
+        unit: Dictionary with keys: unit_num, status_emoji, move_out_str, days_vacant,
+              move_in_str, days_to_be_ready, nvm
     """
     nvm_text = unit.get('nvm', '—')
     nvm_emoji_map = {
-        'vacant': '🔴',
+        'vacant': '🟢',
         'smi': '🔴',
         'notice': '📢',
-        'moving': '📦'
+        'moving': '📦',
+        'notice + smi': '📢 + 🔴'
     }
     nvm_normalized = str(nvm_text).lower().strip()
     nvm_emoji = nvm_emoji_map.get(nvm_normalized, '🟢')
@@ -44,8 +46,8 @@ def render_unit_row(unit: dict) -> None:
       <div class='meta-value' style='font-weight:600;'>{unit['move_in_str']}</div>
     </div>
     <div style='text-align:center;'>
-      <div class='meta-label'>Days Rent</div>
-      <div class='meta-value'>{unit['days_to_rent']}</div>
+      <div class='meta-label'>Days Ready</div>
+      <div class='meta-value'>{unit['days_to_be_ready']}</div>
     </div>
     <div style='text-align:center;'>
       <div class='meta-label'>Nvm</div>

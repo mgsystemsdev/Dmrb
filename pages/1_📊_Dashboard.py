@@ -18,15 +18,14 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 from core.data_loader import load_units_sheet, load_task_sheet
 from core.data_logic import compute_all_unit_fields
 from utils.styling import inject_css
-from utils.constants import EXCEL_FILE_PATH, TOTAL_UNITS
-from utils.timers import render_refresh_controls
+from utils.constants import TOTAL_UNITS
 from ui.hero_cards import render_kpi_card, render_kpi_card_with_progress
 from ui.expanders import render_phase_expander, render_unit_row
-from ui.dividers import render_section_header
 from ui.toggle_controls import render_expand_collapse_controls, get_expanded_state
 from ui.sections import create_simple_section, render_section
 from ui.refresh_controls import render_refresh_controls
 from core.logger import log_event
+from core.phase_logic import build_phase_overview, build_all_units
 
 # --- Page Setup ---
 st.set_page_config(
@@ -43,7 +42,7 @@ inject_css()
 
 # --- Load Data ---
 try:
-    units_df = load_units_sheet(EXCEL_FILE_PATH)
+    units_df = load_units_sheet()
     # Compute lifecycle labels and other derived fields
     column_mapping = {
         'Move-out': 'move_out',
@@ -85,27 +84,7 @@ occupancy_pct = round((occupied_units / TOTAL_UNITS) * 100, 1) if TOTAL_UNITS el
 
 # --- Sidebar Controls ---
 with st.sidebar:
-    st.header("🔍 Controls")
-    
-    if st.button("🔄 Refresh Data", use_container_width=True, key="dash_refresh"):
-        st.cache_data.clear()
-        log_event("INFO", "Dashboard data cache cleared")
-        st.rerun()
-    
-    st.divider()
-    
-    st.markdown(f"""
-    **Last Updated:**  
-    {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-    
-    **Data Source:**  
-    `{EXCEL_FILE_PATH}`
-    """)
-    
-    st.divider()
-    
-    st.markdown("**Suggested Refresh:**")
-    st.caption("Every 5 minutes")
+    render_refresh_controls(key_prefix="dash", auto_refresh=True)
 
 # --- Header ---
 st.markdown("""
@@ -199,7 +178,7 @@ def render_move_outs_today(context):
                 'move_out_str': move_out_date.strftime('%m/%d/%y') if pd.notna(move_out_date) else '—',
                 'days_vacant': '—',
                 'move_in_str': '—',
-                'days_to_rent': '—',
+                'days_to_be_ready': '—',
                 'nvm': row.get('Nvm', '—')
             }
             render_unit_row(unit)
@@ -226,7 +205,7 @@ def render_move_ins_tomorrow(context):
                 'move_out_str': '—',
                 'days_vacant': '—',
                 'move_in_str': move_in_date.strftime('%m/%d/%y') if pd.notna(move_in_date) else '—',
-                'days_to_rent': '—',
+                'days_to_be_ready': '—',
                 'nvm': row.get('Nvm', '—')
             }
             render_unit_row(unit)
@@ -259,7 +238,7 @@ st.divider()
 
 # Load Task sheet
 try:
-    tasks_df = load_task_sheet(EXCEL_FILE_PATH)
+    tasks_df = load_task_sheet()
 except Exception as e:
     tasks_df = pd.DataFrame()
     log_event("WARNING", f"Could not load tasks: {e}")
@@ -299,100 +278,8 @@ expand_all, collapse_all = render_expand_collapse_controls(
 
 st.divider()
 
-# Calculate phase data
-phase_data = []
 today = datetime.now().date()
-
-for phase in sorted(units_df['Phases'].dropna().unique(), key=str):
-    phase_units = units_df[units_df['Phases'] == phase].copy()
-    
-    buildings = []
-    for building in sorted(phase_units['Building'].dropna().unique(), key=str):
-        building_units = phase_units[phase_units['Building'] == building]
-        
-        # Calculate vacant/occupied
-        nvm_norm = building_units['Nvm'].fillna('').astype(str).str.strip().str.lower()
-        vacant_mask = nvm_norm.isin(['vacant', 'smi'])
-        vacant = int(vacant_mask.sum())
-        total = len(building_units)
-        occupied = total - vacant
-        
-        # Get vacant unit details
-        vacant_units_list = []
-        for _, row in building_units[vacant_mask].iterrows():
-            unit_num = str(row.get('Unit', '')).strip()
-            
-            # Move-out date and days vacant
-            move_out = pd.to_datetime(row.get('Move-out'), errors='coerce')  # type: ignore
-            if pd.notna(move_out):
-                days_vacant = (datetime.now() - move_out).days  # type: ignore
-                move_out_str = move_out.strftime('%m/%d/%y')  # type: ignore
-            else:
-                days_vacant = '—'
-                move_out_str = '—'
-            
-            # Move-in date and days to rent
-            move_in = pd.to_datetime(row.get('Move-in'), errors='coerce')  # type: ignore
-            if pd.notna(move_in):
-                days_to_rent = (move_in - datetime.now()).days  # type: ignore
-                move_in_str = move_in.strftime('%m/%d/%y')  # type: ignore
-            else:
-                days_to_rent = '—'
-                move_in_str = '—'
-            
-            lifecycle = row.get('lifecycle_label', 'Not Ready')
-            
-            vacant_units_list.append({
-                'unit_num': unit_num,
-                'status_emoji': '🔴',
-                'move_out_str': move_out_str,
-                'days_vacant': days_vacant,
-                'move_in_str': move_in_str,
-                'days_to_rent': days_to_rent,
-                'lifecycle_label': lifecycle,
-                'nvm': row.get('Nvm', '—')
-            })
-        
-        # Move events for THIS building only
-        move_events = []
-        
-        # Check move-outs
-        if 'Move-out' in building_units.columns:
-            move_out_dates = pd.to_datetime(building_units['Move-out'], errors='coerce')
-            for _, row in building_units[move_out_dates.dt.date == today].iterrows():
-                unit_label = str(row.get('Unit', '')).strip()
-                move_date = row['Move-out'].strftime('%Y-%m-%d') if pd.notna(row['Move-out']) else ''  # type: ignore
-                if unit_label and move_date:
-                    move_events.append(f"🟥 Unit {unit_label} - Move Out {move_date}")
-        
-        # Check move-ins
-        if 'Move-in' in building_units.columns:
-            move_in_dates = pd.to_datetime(building_units['Move-in'], errors='coerce')
-            for _, row in building_units[move_in_dates.dt.date == today].iterrows():
-                unit_label = str(row.get('Unit', '')).strip()
-                move_date = row['Move-in'].strftime('%Y-%m-%d') if pd.notna(row['Move-in']) else ''  # type: ignore
-                if unit_label and move_date:
-                    move_events.append(f"🟩 Unit {unit_label} - Move In {move_date}")
-        
-        buildings.append({
-            'label': f'B{building}',
-            'total_units': total,
-            'vacant': vacant,
-            'occupied': occupied,
-            'move_events': move_events,
-            'vacant_units': vacant_units_list
-        })
-    
-    # Safe phase label generation
-    try:
-        phase_label = f'Phase {int(phase)}'
-    except (ValueError, TypeError):
-        phase_label = f'Phase {phase}'
-    
-    phase_data.append({
-        'phase_label': phase_label,
-        'buildings': buildings
-    })
+phase_data = build_phase_overview(units_df, today=today)
 
 # Render phase cards
 if phase_data:
@@ -416,50 +303,7 @@ st.markdown("""
     <h3 style="color: var(--gray-900); margin-top: 0; margin-bottom: 1.25rem; font-size: 1.5rem;">📋 All Units</h3>
 """, unsafe_allow_html=True)
 
-# Process all units and sort by days vacant
-all_units = []
-for idx, unit_row in units_df.iterrows():
-    unit_num = str(unit_row.get('Unit', '')).strip()
-    if not unit_num:
-        continue
-    
-    # Move-out date and days vacant
-    move_out = pd.to_datetime(unit_row.get('Move-out'), errors='coerce')  # type: ignore
-    if pd.notna(move_out):
-        days_vacant = (datetime.now() - move_out).days  # type: ignore
-        days_vacant_sort = days_vacant
-        move_out_str = move_out.strftime('%m/%d/%y')  # type: ignore
-    else:
-        days_vacant = '—'
-        days_vacant_sort = -1
-        move_out_str = '—'
-    
-    # Move-in date and days to rent
-    move_in = pd.to_datetime(unit_row.get('Move-in'), errors='coerce')  # type: ignore
-    if pd.notna(move_in):
-        days_to_rent = (move_in - datetime.now()).days  # type: ignore
-        move_in_str = move_in.strftime('%m/%d/%y')  # type: ignore
-    else:
-        days_to_rent = '—'
-        move_in_str = '—'
-    
-    # Determine vacancy status
-    nvm_val = str(unit_row.get('Nvm', '')).strip().lower()
-    status_emoji = "🔴" if nvm_val in ['vacant', 'smi'] else "🟢"
-    
-    all_units.append({
-        'unit_num': unit_num,
-        'status_emoji': status_emoji,
-        'move_out_str': move_out_str,
-        'days_vacant': days_vacant,
-        'days_vacant_sort': days_vacant_sort,
-        'move_in_str': move_in_str,
-        'days_to_rent': days_to_rent,
-        'nvm': unit_row.get('Nvm', '—')
-    })
-
-# Sort by days vacant (descending - oldest first)
-all_units.sort(key=lambda x: x['days_vacant_sort'], reverse=True)
+all_units = build_all_units(units_df)
 
 with st.expander(f"📋 View All Units ({len(all_units)} total)", expanded=False):
     for idx, unit in enumerate(all_units):

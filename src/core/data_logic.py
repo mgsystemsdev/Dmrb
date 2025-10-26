@@ -9,10 +9,6 @@ normalizes readiness / vacancy logic.
 
 import pandas as pd
 from datetime import datetime, timedelta, date
-import sys
-from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent))
-
 from core.logger import log_event
 
 
@@ -56,6 +52,7 @@ def compute_turn_level(row: pd.Series) -> str:
     Classify unit’s time status.
     Distinguishes between Ready (vacant aging)
     and Not Ready (turn progress).
+    Used by: pages (Units), any UI that buckets readiness.
     """
     days_vacant = row.get("days_vacant") or 0
     lifecycle = str(row.get("status", "")).lower()
@@ -113,6 +110,9 @@ def compute_all_unit_fields(df_units: pd.DataFrame) -> pd.DataFrame:
     """
     Apply all per-unit computations and return
     enriched DataFrame ready for metrics.
+    Inputs: DataFrame with at least move_in/move_out/nvm/status columns (if present).
+    Outputs: Adds days_vacant, days_to_be_ready, turn_level, unit_blocked, lifecycle_label.
+    Used by: Pages (Dashboard, Units) and any aggregator in core.phase_logic.
     """
     if df_units.empty:
         log_event("WARNING", "Units DataFrame is empty in compute_all_unit_fields.")

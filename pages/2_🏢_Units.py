@@ -1,8 +1,11 @@
-# pages/2_🏢_Units.py
-# ---------------------------------------------------------
-# Units Lifecycle Page: same polished style as Dashboard Phase Overview
-# Phase → Building → Unit hierarchy throughout.
-# ---------------------------------------------------------
+"""
+pages/2_🏢_Units.py
+---------------------------------------------------------
+Units Lifecycle Page: mirrors Dashboard's phase styling.
+Renders Phase → Building → Unit hierarchy and lifecycle tabs.
+Relies on core calculators and shared UI components.
+---------------------------------------------------------
+"""
 
 import streamlit as st
 import pandas as pd
@@ -17,8 +20,10 @@ from core.data_logic import compute_all_unit_fields
 from utils.constants import EXCEL_FILE_PATH, TOTAL_UNITS
 from ui.unit_cards import render_enhanced_unit_row, render_unit_kpi_cards
 from ui.sections import create_simple_section, render_section
-from ui.refresh_controls import render_refresh_controls
 from core.logger import log_event
+from utils.styling import inject_css
+from ui.refresh_controls import render_refresh_controls
+from ui.unit_viewmodels import build_enhanced_unit
 
 # --- Page Setup ---
 st.set_page_config(
@@ -29,6 +34,7 @@ st.set_page_config(
 )
 
 # --- Inject Style to Match Dashboard Phase Overview ---
+inject_css()
 st.markdown("""
 <style>
 .phase-section {
@@ -95,12 +101,7 @@ except:
 
 # --- Sidebar ---
 with st.sidebar:
-    st.header("Controls")
-    if st.button("🔄 Refresh Data", use_container_width=True, key="units_refresh"):
-        st.cache_data.clear()
-        st.rerun()
-    st.divider()
-    st.caption(f"**Updated:** {datetime.now().strftime('%H:%M:%S')}")
+    render_refresh_controls(key_prefix="units", auto_refresh=True)
 
 # --- Header ---
 st.markdown("<h1 style='text-align: center;'>🏢 Units Lifecycle Tracker</h1>", unsafe_allow_html=True)
@@ -135,35 +136,7 @@ with st.container():
 
 st.divider()
 
-# --- Helper Function ---
-def build_enhanced_unit(row, tasks_df) -> dict:
-    unit_id = str(row.get('unit_id', ''))  # Full path
-    unit_tasks = tasks_df[tasks_df.get('Unit', '') == unit_id] if not tasks_df.empty and 'Unit' in tasks_df.columns else pd.DataFrame()
-    lifecycle = row.get('lifecycle_label', 'Unknown')
-    status_emoji_map = {
-        'Ready': '✅',
-        'In Turn': '🔧',
-        'Not Ready': '⚠️'
-    }
-    status_emoji = status_emoji_map.get(lifecycle, '🏠')
-    readiness_pct = 100 if lifecycle == 'Ready' else 50 if lifecycle == 'In Turn' else 0
-
-    days_vacant = row.get('days_vacant')
-    days_vacant_str = str(int(days_vacant)) if pd.notna(days_vacant) and days_vacant != '' else '—'
-
-    days_to_ready = row.get('days_to_be_ready')
-    days_to_ready_str = str(int(days_to_ready)) if pd.notna(days_to_ready) and days_to_ready != '' else '—'
-
-    return {
-        'unit_id': unit_id,  # Show full path
-        'status_emoji': status_emoji,
-        'move_out': row.get('move_out', pd.NaT).strftime('%m/%d/%y') if pd.notna(row.get('move_out')) else '—',
-        'move_in': row.get('move_in', pd.NaT).strftime('%m/%d/%y') if pd.notna(row.get('move_in')) else '—',
-        'days_vacant': days_vacant_str,
-        'days_to_ready': days_to_ready_str,
-        'readiness_pct': readiness_pct,
-        'nvm': row.get('nvm', '—')
-    }
+# (build_enhanced_unit moved to ui/unit_viewmodels)
 
 # --- Render Helper: Phase > Building > Units ---
 def render_units_by_hierarchy(units_subset, tasks_df, title_prefix=""):

@@ -23,7 +23,7 @@ cd DMRB
 pip install streamlit pandas openpyxl
 
 # Run the dashboard
-streamlit run src/app.py
+streamlit run app.py
 ```
 
 ## 📁 Project Structure
@@ -34,16 +34,15 @@ dmrb/
 │   └── DRMB.xlsx                 # Source of truth (Excel workbook)
 │
 ├── src/
-│   ├── app.py                    # Main Streamlit entrypoint
+│   ├── app.py                    # Main Streamlit entrypoint (redirects to pages)
 │   │
 │   ├── pages/
-│   │   ├── dashboard.py          # Property-level KPIs & phase overview
-│   │   └── units.py              # Lifecycle tracking (notice → ready)
+│   │   └── (Streamlit pages live in repo-level `pages/`)
 │   │
 │   ├── core/
 │   │   ├── data_loader.py        # Excel I/O & DataFrame structuring
 │   │   ├── data_logic.py         # Business rules & calculations
-│   │   ├── validator.py          # Data validation & safety checks
+│   │   ├── phase_logic.py        # Phase/All-units aggregations
 │   │   └── logger.py             # Logging utilities
 │   │
 │   ├── ui/
@@ -53,30 +52,29 @@ dmrb/
 │   │
 │   └── utils/
 │       ├── constants.py          # Global configuration
-│       ├── helpers.py            # Formatting & shared logic
+│       ├── helpers.py            # Formatting & shared logic (NVM/date)
 │       ├── timers.py             # Auto-refresh utilities
 │       ├── logger.py             # Operational logging
 │       └── styling.py            # CSS injection
 │
-├── pages/                        # Legacy Streamlit pages (being phased out)
-│   └── 1_Dashboard.py            # Original monolithic dashboard
+├── pages/                        # Streamlit pages
+│   ├── 0_🏠_Home.py
+│   ├── 1_📊_Dashboard.py
+│   └── 2_🏢_Units.py
 │
-├── Home.py                       # Legacy home page
-├── AGENTMD.md                    # AI comprehension manifest
-├── PHASE_IMPLEMENTATION_PLAN.md  # Technical specification
-└── info.md                       # Architecture guide
+└── (additional docs/scripts omitted)
 ```
 
 ## 🎯 Key Features
 
-### Dashboard Page (`src/pages/dashboard.py`)
+### Dashboard Page (`pages/1_📊_Dashboard.py`)
 - **Top KPIs**: Total units, vacant units, occupied units, occupancy %
 - **Phase Overview**: Hierarchical view (Phase → Building → Unit)
 - **Vacancy Details**: Days vacant, move-in/out dates, days to rent
 - **Move Activity**: Today's move-ins and move-outs per building
 - **All Units View**: Sortable list by vacancy age
 
-### Units Lifecycle Page (`src/pages/units.py`)
+### Units Lifecycle Page (`pages/2_🏢_Units.py`)
 - **Lifecycle Stages**: Notice → Vacant → In Turn → Ready
 - **Turn Performance**: On Track, Lagging, Delayed, Critical, Exception
 - **Stage Breakdown**: Tabbed views for each lifecycle stage
@@ -164,9 +162,7 @@ flake8 src/
 
 ## 📚 Documentation
 
-- **AGENTMD.md**: Complete system comprehension manifest for AI agents
-- **PHASE_IMPLEMENTATION_PLAN.md**: Detailed technical specification
-- **info.md**: Architecture overview and folder structure
+  (legacy docs omitted for brevity)
 
 ## 🛠️ Tech Stack
 
@@ -295,7 +291,7 @@ The Dashboard gives a real-time, **property-wide snapshot** of make-ready health
 | Module                | Role                              |
 | --------------------- | --------------------------------- |
 | `core/data_loader.py` | Cached Excel read (`DMRB.xls`)    |
-| `core/validator.py`   | Schema checks (sheets + columns)  |
+| `core/phase_logic.py` | Phase and list aggregations       |
 | `core/data_logic.py`  | KPI math + task window filtering  |
 | `ui/hero_cards.py`    | KPI card rendering                |
 | `ui/expanders.py`     | Phase → Building → Unit layouts   |
@@ -512,7 +508,7 @@ Units Ready | Not Ready | Avg Days Vacant | Turns in Progress
 | ---------------- | -------------------------------------- | ------------------------- |
 | `data_loader.py` | Reads unit + task sheets               | Caches with st.cache_data |
 | `data_logic.py`  | Computes lifecycle and readiness logic | Defines state filters     |
-| `validator.py`   | Ensures data types and integrity       | Prevents broken state     |
+| `phase_logic.py` | Aggregations for pages                 | Reduces duplication       |
 | `hero_cards.py`  | Renders KPI rows                       | Shared UI                 |
 | `expanders.py`   | Handles nested hierarchy rendering     | Shared with Dashboard     |
 | `logger.py`      | Logs refresh and errors                | For auditability          |

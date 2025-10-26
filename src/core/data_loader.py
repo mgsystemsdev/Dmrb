@@ -8,12 +8,9 @@ Now supports both local files and Google Sheets via datasource.py
 
 import pandas as pd
 from pathlib import Path
-import sys
-sys.path.append(str(Path(__file__).parent.parent))
 
 from core.logger import log_event
 from core.datasource import get_excel_file
-from utils.constants import REQUIRED_SHEETS
 
 
 def load_units_sheet(file_path: str = None) -> pd.DataFrame:
@@ -30,7 +27,15 @@ def load_units_sheet(file_path: str = None) -> pd.DataFrame:
         ValueError: If Unit sheet is missing.
     """
     try:
-        xls = get_excel_file()
+        # If a local path is provided and exists, prefer local file for development
+        if file_path:
+            p = Path(file_path)
+            if p.exists():
+                xls = pd.ExcelFile(p)
+            else:
+                xls = get_excel_file()
+        else:
+            xls = get_excel_file()
         df = pd.read_excel(xls, sheet_name="Unit")
         df.columns = df.columns.str.strip()
 
@@ -56,7 +61,14 @@ def load_task_sheet(file_path: str = None) -> pd.DataFrame:
         ValueError: If Task sheet is missing.
     """
     try:
-        xls = get_excel_file()
+        if file_path:
+            p = Path(file_path)
+            if p.exists():
+                xls = pd.ExcelFile(p)
+            else:
+                xls = get_excel_file()
+        else:
+            xls = get_excel_file()
         df = pd.read_excel(xls, sheet_name="Task")
         df.columns = df.columns.str.strip()
 

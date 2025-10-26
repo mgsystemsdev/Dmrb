@@ -8,11 +8,11 @@ The DMRB Dashboard supports loading data from two sources:
 
 ## 🔧 Setup Instructions
 
-### Option 1: Local File (Default)
+### Option 1: Local File (Preferred in development)
 
 1. Place your Excel file at: `data/DRMB.xlsx`
-2. No configuration needed - this is the default mode
-3. Run the app: `streamlit run app.py`
+2. Run the app: `streamlit run app.py`
+3. The app will load the local Excel if it exists; otherwise it will fall back to Google Sheets.
 
 ### Option 2: Google Sheets
 
@@ -55,13 +55,12 @@ GDRIVE_XLSX_URL = "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/export?f
 
 5. Deploy!
 
-## 🔄 Auto-Refresh
+## 🔄 Auto-Refresh & Data Source
 
-The dashboard automatically refreshes data every **5 minutes** when running.
-
-You can also manually refresh:
-- Click **🔄 Refresh Data** button in the sidebar
-- All cached data will be cleared and reloaded
+Use the sidebar's Data Controls (standardized via `ui.refresh_controls`) to:
+- Manually refresh data (clears caches and reloads), and
+- See the active data source (☁️ Google Sheets or Local Excel).
+When installed, `streamlit-autorefresh` enables a 5-minute auto-refresh.
 
 ## 📊 Required Sheets
 

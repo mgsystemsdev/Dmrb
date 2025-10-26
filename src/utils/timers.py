@@ -1,17 +1,23 @@
 """
-utils/timers.py
+utils/timers.py (DEPRECATED)
 ---------------------------------------------------------
-Auto-refresh logic and timed reads for Streamlit.
+Deprecated legacy timers/refresh utilities. Prefer ui.refresh_controls
+for refresh UI and auto-refresh behavior.
 ---------------------------------------------------------
 """
 
 import streamlit as st
 from datetime import datetime
-import sys
-from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent))
 
 from core.logger import log_event
+import warnings
+
+# Emit a deprecation warning if this module is imported
+warnings.warn(
+    "utils.timers is deprecated. Use ui.refresh_controls instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 
 def setup_auto_refresh(interval_seconds: int = 300) -> None:

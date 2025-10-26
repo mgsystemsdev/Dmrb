@@ -1,8 +1,6 @@
 import os
 import streamlit as st
-import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.parent))
 
 from core.logger import log_event
 
