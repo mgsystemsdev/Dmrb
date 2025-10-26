@@ -43,11 +43,11 @@ try:
     column_mapping = {
         'Move-out': 'move_out',
         'Move-in': 'move_in',
-        'Nvm': 'nvm',
         'Unit': 'unit_number',
         'Unit id': 'unit_id',  # Full path like P-5 / Bld-1 / U-210
         'Phases': 'phase',
-        'Building': 'building'
+        'Building': 'building',
+        'Status': 'status'  # Map Status column for lifecycle calculation
     }
     units_df = units_df.rename(columns=column_mapping)
     # Keep status as-is (will be NaN if not populated in Excel)
@@ -95,6 +95,51 @@ kpi_metrics = {
 
 render_section_container_start("Key Performance Indicators", "📊")
 render_unit_kpi_cards(kpi_metrics)
+render_section_container_end()
+
+st.divider()
+
+# --- Lifecycle Breakdown Section ---
+render_section_container_start("Lifecycle Status Breakdown", "🔄")
+
+# Calculate lifecycle counts
+lifecycle_counts = units_df['lifecycle_label'].value_counts()
+ready_count = lifecycle_counts.get('Ready', 0)
+in_turn_count = lifecycle_counts.get('In Turn', 0)
+not_ready_count = lifecycle_counts.get('Not Ready', 0)
+total_count = len(units_df)
+
+# Calculate percentages
+ready_pct = (ready_count / total_count * 100) if total_count > 0 else 0
+in_turn_pct = (in_turn_count / total_count * 100) if total_count > 0 else 0
+not_ready_pct = (not_ready_count / total_count * 100) if total_count > 0 else 0
+
+# Render lifecycle status cards
+col_a, col_b, col_c = st.columns(3, gap="medium")
+
+with col_a:
+    st.metric("✅ Ready", f"{ready_count} units", f"{ready_pct:.0f}%")
+
+with col_b:
+    st.metric("🔧 In Turn", f"{in_turn_count} units", f"{in_turn_pct:.0f}%")
+
+with col_c:
+    st.metric("⚠️ Not Ready", f"{not_ready_count} units", f"{not_ready_pct:.0f}%")
+
+st.divider()
+
+# NVM vs Lifecycle Crosstab
+st.markdown("**NVM Status vs Lifecycle Distribution**")
+
+crosstab = pd.crosstab(units_df['nvm'], units_df['lifecycle_label'], margins=True, margins_name='Total')
+
+# Style the crosstab
+st.dataframe(
+    crosstab,
+    use_container_width=True,
+    height=None
+)
+
 render_section_container_end()
 
 st.divider()

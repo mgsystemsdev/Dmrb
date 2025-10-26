@@ -104,7 +104,7 @@ def compute_lifecycle_label(row: pd.Series) -> str:
         return "Ready"
     
     # Status = work in progress → In Turn
-    if status in ["currently work", "started", "in progress"]:
+    if status in ["in turn", "currently work", "started", "in progress"]:
         return "In Turn"
     
     # Everything else → Not Ready

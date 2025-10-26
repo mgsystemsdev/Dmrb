@@ -49,7 +49,8 @@ try:
         'Move-in': 'move_in',
         'Unit': 'unit_id',
         'Phases': 'phase',
-        'Building': 'building'
+        'Building': 'building',
+        'Status': 'status'  # Map Status column for lifecycle calculation
     }
     units_df = units_df.rename(columns=column_mapping)
     # Compute all derived fields including NVM status
