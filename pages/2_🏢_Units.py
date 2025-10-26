@@ -18,7 +18,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 from core.data_loader import load_units_sheet, load_task_sheet
 from core.data_logic import compute_all_unit_fields
 from utils.constants import EXCEL_FILE_PATH, TOTAL_UNITS
-from ui.unit_cards import render_enhanced_unit_row, render_unit_kpi_cards
+from ui.unit_cards import render_unit_kpi_cards
+from ui.expanders import render_unit_row
 from ui.sections import create_simple_section, render_section
 from core.logger import log_event
 from utils.styling import inject_css, render_section_container_start, render_section_container_end
@@ -146,7 +147,7 @@ def render_units_by_hierarchy(units_subset, tasks_df, title_prefix=""):
                 with st.expander(f"🏢 Building {_safe_numeric_label(building)} — {len(building_units)} units | 🟥 {occupied_count} occ | 🟩 {vacant_count} vac", expanded=False):
                     # Each unit in its own row with a subtle hairline between rows
                     for idx, (_, unit_row) in enumerate(building_units.iterrows()):
-                        render_enhanced_unit_row(build_enhanced_unit(unit_row, tasks_df))
+                        render_unit_row(build_enhanced_unit(unit_row, tasks_df))
                         if idx < len(building_units) - 1:  # No divider after last unit
                             st.markdown('<div class="hairline"></div>', unsafe_allow_html=True)
 

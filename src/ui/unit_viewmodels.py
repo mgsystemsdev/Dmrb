@@ -30,12 +30,16 @@ def build_enhanced_unit(row: pd.Series, tasks_df: pd.DataFrame) -> dict:
     days_to_ready_str = str(int(days_to_ready)) if pd.notna(days_to_ready) and days_to_ready != '' else '—'
 
     return {
-        'unit_id': unit_id,  # Show full path
+        'unit_id': unit_id,  # Full path (for Units page)
+        'unit_num': unit_id,  # Also as unit_num (for render_unit_row compatibility)
         'status_emoji': status_emoji,
         'move_out': row.get('move_out', pd.NaT).strftime('%m/%d/%y') if pd.notna(row.get('move_out')) else '—',
+        'move_out_str': row.get('move_out', pd.NaT).strftime('%m/%d/%y') if pd.notna(row.get('move_out')) else '—',  # Compatible key
         'move_in': row.get('move_in', pd.NaT).strftime('%m/%d/%y') if pd.notna(row.get('move_in')) else '—',
+        'move_in_str': row.get('move_in', pd.NaT).strftime('%m/%d/%y') if pd.notna(row.get('move_in')) else '—',  # Compatible key
         'days_vacant': days_vacant_str,
         'days_to_ready': days_to_ready_str,
+        'days_to_be_ready': days_to_ready_str,  # Compatible key
         'readiness_pct': readiness_pct,
         'nvm': row.get('nvm', '—')
     }
