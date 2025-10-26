@@ -31,7 +31,7 @@ def get_gdrive_url() -> str:
         return st.secrets["GDRIVE_XLSX_URL"]
     
     # Fallback to hardcoded URL
-    return "https://docs.google.com/spreadsheets/d/1b8Chlo8YrXQYr9KASQpIYYw6Ofk8P7gu/export?format=xlsx"
+    return "https://docs.google.com/spreadsheets/d/1alxeq1eGB6nbDXWhKh5O34FQkFcXkYOI/export?format=xlsx"
 
 
 @st.cache_data(ttl=300)  # Cache for 5 minutes

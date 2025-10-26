@@ -199,7 +199,8 @@ def render_move_outs_today(context):
                 'move_out_str': move_out_date.strftime('%m/%d/%y') if pd.notna(move_out_date) else '—',
                 'days_vacant': '—',
                 'move_in_str': '—',
-                'days_to_rent': '—'
+                'days_to_rent': '—',
+                'nvm': row.get('Nvm', '—')
             }
             render_unit_row(unit)
     else:
@@ -225,7 +226,8 @@ def render_move_ins_tomorrow(context):
                 'move_out_str': '—',
                 'days_vacant': '—',
                 'move_in_str': move_in_date.strftime('%m/%d/%y') if pd.notna(move_in_date) else '—',
-                'days_to_rent': '—'
+                'days_to_rent': '—',
+                'nvm': row.get('Nvm', '—')
             }
             render_unit_row(unit)
     else:
@@ -451,7 +453,8 @@ for idx, unit_row in units_df.iterrows():
         'days_vacant': days_vacant,
         'days_vacant_sort': days_vacant_sort,
         'move_in_str': move_in_str,
-        'days_to_rent': days_to_rent
+        'days_to_rent': days_to_rent,
+        'nvm': unit_row.get('Nvm', '—')
     })
 
 # Sort by days vacant (descending - oldest first)

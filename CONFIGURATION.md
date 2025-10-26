@@ -27,7 +27,7 @@ The DMRB Dashboard supports loading data from two sources:
 
 Example URL:
 ```
-https://docs.google.com/spreadsheets/d/1b8Chlo8YrXQYr9KASQpIYYw6Ofk8P7gu/export?format=xlsx
+https://docs.google.com/spreadsheets/d/1alxeq1eGB6nbDXWhKh5O34FQkFcXkYOI/export?format=xlsx
 ```
 
 #### Step 2: Configure Streamlit Secrets

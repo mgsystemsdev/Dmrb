@@ -161,7 +161,7 @@ def build_enhanced_unit(row, tasks_df) -> dict:
         'days_vacant': days_vacant_str,
         'days_to_ready': days_to_ready_str,
         'readiness_pct': readiness_pct,
-        'status': lifecycle  # Add status to display at end
+        'nvm': row.get('nvm', '—')
     }
 
 # --- Render Helper: Phase > Building > Units ---
