@@ -184,7 +184,7 @@ def render_units_by_hierarchy(units_subset, tasks_df, title_prefix=""):
 
         # Phase expander
         with st.expander(f"🧱 Phase {int(phase)} — {len(phase_units)} units", expanded=False):
-            for building in sorted(phase_units['building'].dropna().unique()):
+            for building in sorted(phase_units['building'].dropna().unique(), key=lambda x: str(x)):
                 building_units = phase_units[phase_units['building'] == building]
                 
                 # Calculate building stats
