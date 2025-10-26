@@ -81,6 +81,7 @@ total_units = TOTAL_UNITS  # Use constant for display
 avg_days_vacant = units_df['days_vacant'].mean() if 'days_vacant' in units_df.columns else 0
 active_turns = units_df['lifecycle_label'].isin(['In Turn']).sum() if 'lifecycle_label' in units_df.columns else 0
 units_ready = units_df['lifecycle_label'].isin(['Ready']).sum() if 'lifecycle_label' in units_df.columns else 0
+not_ready_units = units_df['lifecycle_label'].isin(['Not Ready']).sum() if 'lifecycle_label' in units_df.columns else 0
 
 kpi_metrics = {
     'total_units': total_units,
@@ -90,7 +91,8 @@ kpi_metrics = {
     'vacancy_pct': vacancy_pct,
     'avg_days_vacant': avg_days_vacant,
     'active_turns': active_turns,
-    'units_ready': units_ready
+    'units_ready': units_ready,
+    'not_ready_units': not_ready_units
 }
 
 render_section_container_start("Key Performance Indicators", "📊")

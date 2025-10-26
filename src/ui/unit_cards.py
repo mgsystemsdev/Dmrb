@@ -60,8 +60,8 @@ def render_unit_kpi_cards(metrics: dict) -> None:
     with col4:
         st.metric("Occupancy", f"{metrics.get('occupancy_pct', 0):.1f}%")
 
-    # Second row
-    col5, col6, col7, col8 = st.columns(4, gap="small")
+    # Second row (expanded to include Not Ready)
+    col5, col6, col7, col8, col9 = st.columns(5, gap="small")
 
     with col5:
         st.metric("Avg Days Vacant", f"{metrics.get('avg_days_vacant', 0):.1f}")
@@ -70,7 +70,10 @@ def render_unit_kpi_cards(metrics: dict) -> None:
         st.metric("In Turn", f"{metrics.get('active_turns', 0):,}")
 
     with col7:
-        st.metric("Ready", f"{metrics.get('units_ready', 0):,}")
+        st.metric("Not Ready", f"{metrics.get('not_ready_units', 0):,}")
 
     with col8:
+        st.metric("Ready", f"{metrics.get('units_ready', 0):,}")
+
+    with col9:
         st.metric("Vacancy %", f"{metrics.get('vacancy_pct', 0):.1f}%")
