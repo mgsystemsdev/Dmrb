@@ -166,9 +166,9 @@ def render_nvm_tab(context):
     nvm_tabs = st.tabs(["📢 Notice", "🔴 Vacant", "📦 Moving"])
 
     with nvm_tabs[0]:
-        # Notice = nvm column contains 'notice'
+        # Notice = nvm contains 'notice' (includes NOTICE and NOTICE + SMI)
         nvm_norm = units_df['nvm'].fillna('').astype(str).str.lower()
-        notice = units_df[nvm_norm == 'notice'].copy()
+        notice = units_df[nvm_norm.str.contains('notice', na=False)].copy()
         notice = notice.sort_values('days_vacant', ascending=False, na_position='last')
         render_units_by_hierarchy(notice, tasks_df, "on notice")
 
@@ -180,10 +180,11 @@ def render_nvm_tab(context):
         render_units_by_hierarchy(vacant, tasks_df, "vacant")
 
     with nvm_tabs[2]:
-        # Moving = move-in within next 72 hours
+        # Moving = move-in within next 72 hours (but not already moved in)
         move_in_dates = pd.to_datetime(units_df['move_in'], errors='coerce')
-        next_72h = datetime.now() + timedelta(hours=72)
-        moving = units_df[move_in_dates <= next_72h].copy()
+        now = datetime.now()
+        next_72h = now + timedelta(hours=72)
+        moving = units_df[(move_in_dates > now) & (move_in_dates <= next_72h)].copy()
         moving = moving.sort_values('days_vacant', ascending=False, na_position='last')
         render_units_by_hierarchy(moving, tasks_df, "moving in 72h")
 
