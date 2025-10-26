@@ -63,7 +63,7 @@ def render_building_expander(building: dict, expanded: bool = False) -> None:
     vacant = building.get('vacant_count', 0)
     move_in = building.get('move_in_count', 0)
     
-    building_label = f"🏢 {building['label']} — {building['total_units']} units | 📢 Notice {notice} | 🔴 Vacant {vacant} | 🟢 Move-In {move_in}"
+    building_label = f"🏢 {building['label']} — {building['total_units']} units | 📢 Notice {notice} | 🟢 Vacant {vacant} | 🔴 Move-In {move_in}"
     with st.expander(building_label, expanded=expanded):
         # Vacant units section
         if building.get('vacant_units'):

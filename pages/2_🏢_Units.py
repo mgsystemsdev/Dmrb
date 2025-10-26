@@ -232,7 +232,7 @@ def render_units_by_hierarchy(units_subset, tasks_df, title_prefix=""):
                 move_in_count = (nvm_norm == 'move in').sum()
 
                 # Building expander inside phase
-                with st.expander(f"🏢 Building {_safe_numeric_label(building)} — {len(building_units)} units | 📢 Notice {notice_count} | 🔴 Vacant {vacant_count} | 🟢 Move-In {move_in_count}", expanded=False):
+                with st.expander(f"🏢 Building {_safe_numeric_label(building)} — {len(building_units)} units | 📢 Notice {notice_count} | 🟢 Vacant {vacant_count} | 🔴 Move-In {move_in_count}", expanded=False):
                     # Each unit in its own row with a subtle hairline between rows
                     for idx, (_, unit_row) in enumerate(building_units.iterrows()):
                         render_unit_row(build_enhanced_unit(unit_row, tasks_df))
