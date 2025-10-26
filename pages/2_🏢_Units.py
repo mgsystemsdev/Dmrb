@@ -180,13 +180,36 @@ def render_nvm_tab(context):
         render_units_by_hierarchy(vacant, tasks_df, "vacant")
 
     with nvm_tabs[2]:
-        # Moving = move-in within next 72 hours (but not already moved in)
+        # Moving = 72-hour hold after move-in (from move-in day through day 3)
         move_in_dates = pd.to_datetime(units_df['move_in'], errors='coerce')
         now = datetime.now()
-        next_72h = now + timedelta(hours=72)
-        moving = units_df[(move_in_dates > now) & (move_in_dates <= next_72h)].copy()
-        moving = moving.sort_values('days_vacant', ascending=False, na_position='last')
-        render_units_by_hierarchy(moving, tasks_df, "moving in 72h")
+        past_72h = now - timedelta(hours=72)
+        moving = units_df[(move_in_dates <= now) & (move_in_dates >= past_72h)].copy()
+        
+        # Add time remaining in 72h window
+        if len(moving) > 0:
+            moving_with_time = []
+            for idx, row in moving.iterrows():
+                mi = pd.to_datetime(row['move_in'])
+                hours_since = (now - mi).total_seconds() / 3600
+                hours_remaining = 72 - hours_since
+                days_remaining = int(hours_remaining / 24)
+                hours_rem = int(hours_remaining % 24)
+                moving_with_time.append({
+                    'unit': row.get('unit_number', 'N/A'),
+                    'time_display': f"Day {3 - days_remaining} of 3 ({hours_rem}h remaining)"
+                })
+        
+        moving = moving.sort_values('move_in', ascending=False, na_position='last')
+        
+        st.caption(f"**{len(moving)} units** in 72-hour post-move-in hold")
+        st.info("💡 Units remain in 'Moving' status for 72 hours (3 days) after move-in date")
+        st.divider()
+        
+        if len(moving) > 0:
+            render_units_by_hierarchy(moving, tasks_df, "in 72h hold period")
+        else:
+            st.info("No units currently in 72-hour move-in hold period")
 
 def render_ready_vs_not_tab(context):
     units_df, tasks_df = context['units_df'], context['tasks_df']
