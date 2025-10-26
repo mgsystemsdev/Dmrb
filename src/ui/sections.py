@@ -95,15 +95,10 @@ def render_section(section: Section, context: dict) -> None:
         section: Section object to render
         context: Context dictionary passed to render functions
     """
-    # Section header
+    # Section header (thin divider style)
     if section.show_header:
-        st.markdown(f"""
-        <div style="background: var(--gray-100); border: 2px solid var(--gray-400); 
-                    border-radius: var(--radius-lg); padding: var(--spacing-xl); 
-                    margin-bottom: 2rem; box-shadow: var(--shadow-xl);">
-            <h3 style="color: var(--gray-900); margin-top: 0; margin-bottom: 1.25rem; 
-                       font-size: 1.5rem;">{section.icon} {section.title}</h3>
-        """, unsafe_allow_html=True)
+        from utils.styling import render_section_container_start
+        render_section_container_start(section.title, section.icon)
     
     # Render each tab row
     for tab_row in section.rows:
@@ -112,9 +107,6 @@ def render_section(section: Section, context: dict) -> None:
         # Add spacing between rows
         if len(section.rows) > 1:
             st.divider()
-    
-    if section.show_header:
-        st.markdown('</div>', unsafe_allow_html=True)
 
 
 def render_sections(sections: list[Section], context: dict) -> None:

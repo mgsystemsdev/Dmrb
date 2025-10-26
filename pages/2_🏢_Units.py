@@ -336,9 +336,7 @@ context = {
     'today': datetime.now().date()
 }
 
-render_section_container_start("Units Overview", "🏠")
 render_section(units_section, context)
-render_section_container_end()
 
 st.divider()
 
