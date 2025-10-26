@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
 
 from core.data_loader import load_units_sheet, load_task_sheet
 from core.data_logic import compute_all_unit_fields
-from utils.styling import inject_css
+from utils.styling import inject_css, render_section_container_start, render_section_container_end, render_section_container_start, render_section_container_end
 from utils.constants import TOTAL_UNITS
 from ui.hero_cards import render_kpi_card, render_kpi_card_with_progress
 from ui.expanders import render_phase_expander, render_unit_row
@@ -116,9 +116,7 @@ st.markdown("""
 st.divider()
 
 # --- KPI Section ---
-st.markdown("""
-<div style="background: var(--gray-100); border: 2px solid var(--gray-400); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: 2rem; box-shadow: var(--shadow-xl);">
-""", unsafe_allow_html=True)
+render_section_container_start("Key Performance Indicators", "📊")
 
 col1, col2, col3, col4 = st.columns(4, gap="medium")
 
@@ -151,7 +149,7 @@ with col4:
         emoji=""
     )
 
-st.markdown('</div>', unsafe_allow_html=True)
+render_section_container_end()
 st.divider()
 
 # --- Move Activity Section ---
@@ -247,10 +245,7 @@ except Exception as e:
 from core.task_logic import get_yesterday_tasks
 from ui.task_cards import render_all_tasks
 
-st.markdown("""
-<div style="background: var(--gray-100); border: 2px solid var(--gray-400); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: 2rem; box-shadow: var(--shadow-xl);">
-    <h3 style="color: var(--gray-900); margin-top: 0; margin-bottom: 1.25rem; font-size: 1.5rem;">🚶 Walk of the Day</h3>
-""", unsafe_allow_html=True)
+render_section_container_start("Walk of the Day", "🚶")
 
 if not tasks_df.empty:
     # Get yesterday's tasks grouped by type
@@ -261,14 +256,11 @@ if not tasks_df.empty:
 else:
     st.warning("Task sheet not available")
 
-st.markdown('</div>', unsafe_allow_html=True)
+render_section_container_end()
 
 st.divider()
 # --- Phase Overview Section ---
-st.markdown("""
-<div style="background: var(--gray-100); border: 2px solid var(--gray-400); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: 2rem; box-shadow: var(--shadow-xl);">
-    <h3 style="color: var(--gray-900); margin-top: 0; margin-bottom: 1.25rem; font-size: 1.5rem;">🧱 Phase Overview</h3>
-""", unsafe_allow_html=True)
+render_section_container_start("Phase Overview", "🧱")
 
 # Expand/Collapse controls
 expand_all, collapse_all = render_expand_collapse_controls(
@@ -294,14 +286,11 @@ if phase_data:
 else:
     st.info("No phase data available.")
 
-st.markdown('</div>', unsafe_allow_html=True)
+render_section_container_end()
 st.divider()
 
 # --- All Units Section ---
-st.markdown("""
-<div style="background: var(--gray-100); border: 2px solid var(--gray-400); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: 2rem; box-shadow: var(--shadow-xl);">
-    <h3 style="color: var(--gray-900); margin-top: 0; margin-bottom: 1.25rem; font-size: 1.5rem;">📋 All Units</h3>
-""", unsafe_allow_html=True)
+render_section_container_start("All Units", "📋")
 
 all_units = build_all_units(units_df)
 
@@ -311,7 +300,7 @@ with st.expander(f"📋 View All Units ({len(all_units)} total)", expanded=False
         if idx < len(all_units) - 1:
             st.divider()
 
-st.markdown('</div>', unsafe_allow_html=True)
+render_section_container_end()
 
 # --- Footer ---
 st.divider()

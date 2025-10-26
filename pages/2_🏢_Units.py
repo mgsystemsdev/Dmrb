@@ -21,7 +21,7 @@ from utils.constants import EXCEL_FILE_PATH, TOTAL_UNITS
 from ui.unit_cards import render_enhanced_unit_row, render_unit_kpi_cards
 from ui.sections import create_simple_section, render_section
 from core.logger import log_event
-from utils.styling import inject_css
+from utils.styling import inject_css, render_section_container_start, render_section_container_end
 from ui.refresh_controls import render_refresh_controls
 from ui.unit_viewmodels import build_enhanced_unit
 
@@ -33,47 +33,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Inject Style to Match Dashboard Phase Overview ---
+# --- Inject Global CSS ---
 inject_css()
-st.markdown("""
-<style>
-.phase-section {
-    background: var(--gray-100);
-    border: 2px solid var(--gray-400);
-    border-radius: var(--radius-lg);
-    padding: var(--spacing-xl);
-    margin-bottom: 2rem;
-    box-shadow: var(--shadow-xl);
-}
-.phase-section h3 {
-    color: var(--gray-900);
-    margin-top: 0;
-    margin-bottom: 1.25rem;
-    font-size: 1.5rem;
-    font-weight: 700;
-}
-.streamlit-expanderHeader {
-    background-color: rgba(255, 255, 255, 0.6) !important;
-    border-radius: 8px !important;
-    font-weight: 600 !important;
-}
-/* Center only page/section titles */
-h1, h2, h3, h4 { text-align: center !important; }
-/* Make unit rows thinner without changing font sizes */
-.phase-section [data-testid="stMetric"] { margin: 0.1rem 0 !important; padding: 0 !important; }
-.phase-section [data-testid="stMetricLabel"] { margin-bottom: 0.1rem !important; }
-.phase-section [data-testid="stMetricValue"] { line-height: 1.1 !important; }
-.phase-section [data-testid="stCaptionContainer"] { margin: 0.1rem 0 0 0 !important; }
-.phase-section [data-testid="column"] { padding-left: 0.25rem !important; padding-right: 0.25rem !important; }
-.phase-section [data-testid="stMarkdownContainer"] p { margin: 0.1rem 0 !important; }
-.phase-section div[role="progressbar"] { height: 6px !important; }
-hr {
-    border-top: 1px solid var(--gray-300);
-    margin-top: 0.75rem;
-    margin-bottom: 0.75rem;
-}
-</style>
-""", unsafe_allow_html=True)
 
 # --- Load Data ---
 try:
@@ -81,13 +42,14 @@ try:
     column_mapping = {
         'Move-out': 'move_out',
         'Move-in': 'move_in',
+        'Nvm': 'nvm',
         'Unit': 'unit_number',
         'Unit id': 'unit_id',  # Full path like P-5 / Bld-1 / U-210
         'Phases': 'phase',
         'Building': 'building'
     }
     units_df = units_df.rename(columns=column_mapping)
-    # Compute all derived fields including NVM status
+    # Keep status as-is (will be NaN if not populated in Excel)
     units_df = compute_all_unit_fields(units_df)
 except Exception as e:
     st.error(f"Failed to load data: {e}")
@@ -109,9 +71,8 @@ st.divider()
 
 # --- KPIs ---
 # Use TOTAL_UNITS constant (1300) for calculations like Dashboard
-from utils.constants import VACANT_STATUSES
 nvm_norm = units_df['nvm'].fillna('').astype(str).str.lower()
-vacant_units = nvm_norm.isin([s.lower() for s in VACANT_STATUSES]).sum()
+vacant_units = nvm_norm.isin(['vacant', 'smi']).sum()
 occupied_units = TOTAL_UNITS - vacant_units
 occupancy_pct = (occupied_units / TOTAL_UNITS * 100) if TOTAL_UNITS else 0
 vacancy_pct = (vacant_units / TOTAL_UNITS * 100) if TOTAL_UNITS else 0
@@ -131,8 +92,9 @@ kpi_metrics = {
     'units_ready': units_ready
 }
 
-with st.container():
-    render_unit_kpi_cards(kpi_metrics)
+render_section_container_start("Key Performance Indicators", "📊")
+render_unit_kpi_cards(kpi_metrics)
+render_section_container_end()
 
 st.divider()
 
@@ -163,11 +125,7 @@ def render_units_by_hierarchy(units_subset, tasks_df, title_prefix=""):
             return (0, int(m.group(0)))
         return (1, s)
 
-    # Wrap in styled container matching dashboard
-    st.markdown("""
-<div class="phase-section" style="background: var(--gray-100); border: 2px solid var(--gray-400); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: 2rem; box-shadow: var(--shadow-xl);">
-""", unsafe_allow_html=True)
-
+    # Content only - no wrapper
     st.caption(f"**{len(units_subset)} units** {title_prefix}")
     st.divider()
 
@@ -192,7 +150,6 @@ def render_units_by_hierarchy(units_subset, tasks_df, title_prefix=""):
                         if idx < len(building_units) - 1:  # No divider after last unit
                             st.markdown('<div class="hairline"></div>', unsafe_allow_html=True)
 
-    st.markdown('</div>', unsafe_allow_html=True)
 
 # --- Tab Renderers ---
 def render_active_units_tab(context):
@@ -267,12 +224,14 @@ context = {
     'today': datetime.now().date()
 }
 
+render_section_container_start("Units Overview", "🏠")
 render_section(units_section, context)
+render_section_container_end()
 
 st.divider()
 
 # --- Footer KPIs ---
-st.subheader("Performance Summary")
+render_section_container_start("Performance Summary", "📈")
 
 footer_col1, footer_col2, footer_col3, footer_col4 = st.columns(4)
 
@@ -292,6 +251,8 @@ with footer_col3:
 
 with footer_col4:
     st.metric("Health Status", health_status)
+
+render_section_container_end()
 
 st.divider()
 st.caption("© 2025 Thousand Oaks | Units Lifecycle")

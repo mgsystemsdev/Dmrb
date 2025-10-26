@@ -5,6 +5,35 @@ from pathlib import Path
 from core.logger import log_event
 
 
+# ============================================================================
+# STANDARD CONTAINER STYLES
+# ============================================================================
+
+def render_section_container_start(title: str, icon: str = "") -> None:
+    """
+    Render the start of a standard section container.
+    
+    Args:
+        title: Section title text
+        icon: Optional emoji icon
+    
+    Usage:
+        render_section_container_start("Key Metrics", "📊")
+        # ... content ...
+        render_section_container_end()
+    """
+    title_text = f"{icon} {title}" if icon else title
+    st.markdown(f"""
+<div style="background: var(--gray-100); border: 2px solid var(--gray-400); border-radius: var(--radius-lg); padding: var(--spacing-xl); margin-bottom: 2rem; box-shadow: var(--shadow-xl);">
+    <h3 style="color: var(--gray-900); margin-top: 0; margin-bottom: 1.25rem; font-size: 1.5rem;">{title_text}</h3>
+""", unsafe_allow_html=True)
+
+
+def render_section_container_end() -> None:
+    """Render the end of a standard section container."""
+    st.markdown('</div>', unsafe_allow_html=True)
+
+
 def inject_css(path: str = None) -> None:
     """
     Inject a CSS file into the Streamlit app.
