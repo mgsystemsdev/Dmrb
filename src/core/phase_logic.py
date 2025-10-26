@@ -38,11 +38,18 @@ def build_phase_overview(units_df: pd.DataFrame, today: date | None = None) -> L
             building_units = phase_units[phase_units['Building'] == building].copy()
 
             nvm_norm = normalize_nvm_series(building_units['nvm']) if 'nvm' in building_units.columns else pd.Series(dtype=str)
-            vacant_mask = nvm_norm.isin(['vacant', 'smi']) if not nvm_norm.empty else pd.Series(False, index=building_units.index)
-
-            vacant = int(vacant_mask.sum())
+            
+            # Calculate NVM classification counts
+            notice_count = int(nvm_norm.str.contains('notice', na=False).sum())
+            vacant_count = int(nvm_norm.isin(['vacant', 'smi']).sum())
+            move_in_count = int((nvm_norm == 'move in').sum())
+            
             total = len(building_units)
-            occupied = total - vacant
+            
+            # Keep old counts for backward compatibility (deprecated)
+            vacant = vacant_count
+            occupied = total - vacant_count
+            vacant_mask = nvm_norm.isin(['vacant', 'smi'])
 
             vacant_units_list: List[Dict[str, Any]] = []
             for _, row in building_units[vacant_mask].iterrows():
@@ -91,8 +98,11 @@ def build_phase_overview(units_df: pd.DataFrame, today: date | None = None) -> L
             buildings.append({
                 'label': f'B{building}',
                 'total_units': total,
-                'vacant': vacant,
-                'occupied': occupied,
+                'notice_count': notice_count,
+                'vacant_count': vacant_count,
+                'move_in_count': move_in_count,
+                'vacant': vacant,  # Deprecated
+                'occupied': occupied,  # Deprecated
                 'move_events': move_events,
                 'vacant_units': vacant_units_list,
             })

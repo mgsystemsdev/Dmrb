@@ -53,13 +53,17 @@ def render_unit_row(unit: dict) -> None:
 
 def render_building_expander(building: dict, expanded: bool = False) -> None:
     """
-    Render a building expander with units and move events.
+    Render a building expander with NVM classification counts.
 
     Args:
-        building: Dictionary with keys: label, total_units, occupied, vacant, vacant_units, move_events
+        building: Dictionary with keys: label, total_units, notice_count, vacant_count, move_in_count, vacant_units, move_events
         expanded: Whether expander starts open (default: False)
     """
-    building_label = f"🏢 {building['label']} — {building['total_units']} units | 🟩 {building['occupied']} occ | 🟥 {building['vacant']} vac"
+    notice = building.get('notice_count', 0)
+    vacant = building.get('vacant_count', 0)
+    move_in = building.get('move_in_count', 0)
+    
+    building_label = f"🏢 {building['label']} — {building['total_units']} units | 📢 Notice {notice} | 🔴 Vacant {vacant} | 🟢 Move-In {move_in}"
     with st.expander(building_label, expanded=expanded):
         # Vacant units section
         if building.get('vacant_units'):

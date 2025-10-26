@@ -225,13 +225,14 @@ def render_units_by_hierarchy(units_subset, tasks_df, title_prefix=""):
             for building in sorted(phase_units['building'].dropna().unique(), key=_numeric_sort_key):
                 building_units = phase_units[phase_units['building'] == building]
                 
-                # Calculate building stats
+                # Calculate NVM classification counts
                 nvm_norm = building_units['nvm'].fillna('').astype(str).str.lower()
+                notice_count = nvm_norm.str.contains('notice', na=False).sum()
                 vacant_count = nvm_norm.isin(['vacant', 'smi']).sum()
-                occupied_count = len(building_units) - vacant_count
+                move_in_count = (nvm_norm == 'move in').sum()
 
                 # Building expander inside phase
-                with st.expander(f"🏢 Building {_safe_numeric_label(building)} — {len(building_units)} units | 🟥 {occupied_count} occ | 🟩 {vacant_count} vac", expanded=False):
+                with st.expander(f"🏢 Building {_safe_numeric_label(building)} — {len(building_units)} units | 📢 Notice {notice_count} | 🔴 Vacant {vacant_count} | 🟢 Move-In {move_in_count}", expanded=False):
                     # Each unit in its own row with a subtle hairline between rows
                     for idx, (_, unit_row) in enumerate(building_units.iterrows()):
                         render_unit_row(build_enhanced_unit(unit_row, tasks_df))
