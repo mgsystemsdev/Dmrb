@@ -37,10 +37,10 @@ st.subheader("🏢 Community Overview")
 col1, col2, col3 = st.columns(3, gap="large")
 
 with col1:
-    st.markdown("""
+    st.markdown(f"""
     <div style='background: var(--gray-200); border: 1px solid var(--gray-400); border-radius: var(--radius-md); padding: var(--spacing-md); text-align: center; box-shadow: var(--shadow-md);'>
         <div style='color: var(--gray-700); font-size: 0.75rem; font-weight: 600; text-transform: uppercase;'>Total Units</div>
-        <div style='color: var(--gray-900); font-size: 2.5rem; font-weight: 800; margin: 0.5rem 0;'>1,300</div>
+        <div style='color: var(--gray-900); font-size: 2.5rem; font-weight: 800; margin: 0.5rem 0;'>{TOTAL_UNITS:,}</div>
         <div style='color: var(--gray-700); font-size: 0.875rem;'>Apartment Units</div>
     </div>
     """, unsafe_allow_html=True)
