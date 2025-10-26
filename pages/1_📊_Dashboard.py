@@ -303,7 +303,7 @@ st.divider()
 phase_data = []
 today = datetime.now().date()
 
-for phase in sorted(units_df['Phases'].dropna().unique()):
+for phase in sorted(units_df['Phases'].dropna().unique(), key=str):
     phase_units = units_df[units_df['Phases'] == phase].copy()
     
     buildings = []

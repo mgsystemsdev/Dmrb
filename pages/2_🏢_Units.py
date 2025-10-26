@@ -179,7 +179,7 @@ def render_units_by_hierarchy(units_subset, tasks_df, title_prefix=""):
     st.caption(f"**{len(units_subset)} units** {title_prefix}")
     st.divider()
 
-    for phase in sorted(units_subset['phase'].dropna().unique()):
+    for phase in sorted(units_subset['phase'].dropna().unique(), key=str):
         phase_units = units_subset[units_subset['phase'] == phase]
 
         # Phase expander
