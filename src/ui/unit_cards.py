@@ -33,14 +33,16 @@ def render_enhanced_unit_row(unit: dict) -> None:
         st.markdown(f"<small><strong>Days Rent</strong><br>{unit.get('days_to_ready', '—')}</small>", unsafe_allow_html=True)
     
     with col6:
-        status_text = unit.get('status', 'Not Ready')
-        status_emoji_map = {
-            'Ready': '✅',
-            'In Turn': '🔧',
-            'Not Ready': '⚠️'
+        nvm_text = unit.get('nvm', '—')
+        nvm_emoji_map = {
+            'vacant': '🔴',
+            'smi': '🔴',
+            'notice': '📢',
+            'moving': '📦'
         }
-        status_emoji = status_emoji_map.get(status_text, '⚠️')
-        st.markdown(f"<small><strong>Status</strong><br>{status_emoji} {status_text}</small>", unsafe_allow_html=True)
+        nvm_normalized = str(nvm_text).lower().strip()
+        nvm_emoji = nvm_emoji_map.get(nvm_normalized, '🟢')
+        st.markdown(f"<small><strong>Nvm</strong><br>{nvm_emoji} {nvm_text}</small>", unsafe_allow_html=True)
 
 def render_unit_kpi_cards(metrics: dict) -> None:
     """

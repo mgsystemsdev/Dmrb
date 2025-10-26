@@ -10,19 +10,20 @@ import streamlit as st
 
 def render_unit_row(unit: dict) -> None:
     """
-    Render a single, compact unit row with Status at the end.
+    Render a single, compact unit row with Nvm at the end.
 
     Args:
-        unit: Dictionary with keys: unit_num, status_emoji, move_out_str, days_vacant, move_in_str, days_to_rent, lifecycle_label
+        unit: Dictionary with keys: unit_num, status_emoji, move_out_str, days_vacant, move_in_str, days_to_rent, nvm
     """
-    # Get lifecycle status
-    lifecycle = unit.get('lifecycle_label', 'Not Ready')
-    lifecycle_emoji_map = {
-        'Ready': '✅',
-        'In Turn': '🔧',
-        'Not Ready': '⚠️'
+    nvm_text = unit.get('nvm', '—')
+    nvm_emoji_map = {
+        'vacant': '🔴',
+        'smi': '🔴',
+        'notice': '📢',
+        'moving': '📦'
     }
-    lifecycle_emoji = lifecycle_emoji_map.get(lifecycle, '⚠️')
+    nvm_normalized = str(nvm_text).lower().strip()
+    nvm_emoji = nvm_emoji_map.get(nvm_normalized, '🟢')
     
     st.markdown(f"""
 <div class='unit-card'>
@@ -47,8 +48,8 @@ def render_unit_row(unit: dict) -> None:
       <div class='meta-value'>{unit['days_to_rent']}</div>
     </div>
     <div style='text-align:center;'>
-      <div class='meta-label'>Status</div>
-      <div class='meta-value'>{lifecycle_emoji} {lifecycle}</div>
+      <div class='meta-label'>Nvm</div>
+      <div class='meta-value'>{nvm_emoji} {nvm_text}</div>
     </div>
   </div>
 </div>
