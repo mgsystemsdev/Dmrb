@@ -51,7 +51,9 @@ try:
     }
     units_df = units_df.rename(columns=column_mapping)
     # Keep status as-is (will be NaN if not populated in Excel)
-    units_df = compute_all_unit_fields(units_df)
+    # Use a single, consistent 'today' for all derived computations and UI
+    today_ref = datetime.now().date()
+    units_df = compute_all_unit_fields(units_df, today=today_ref)
 except Exception as e:
     st.error(f"Failed to load data: {e}")
     st.stop()
@@ -334,7 +336,7 @@ units_section = create_simple_section(
 context = {
     'units_df': units_df,
     'tasks_df': tasks_df,
-    'today': datetime.now().date()
+    'today': today_ref
 }
 
 render_section(units_section, context)

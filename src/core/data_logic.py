@@ -28,6 +28,16 @@ def _today() -> pd.Timestamp:
     return pd.Timestamp("today").normalize()
 
 
+def _norm_today(today: object | None) -> pd.Timestamp:
+    """Normalize an external 'today' to midnight if provided, else system today."""
+    if today is None:
+        return _today()
+    try:
+        return pd.to_datetime(today).normalize()
+    except Exception:
+        return _today()
+
+
 def _safe_days_between(date1, date2) -> int | None:
     """Return integer day difference, handling NaT/None."""
     try:
@@ -43,16 +53,16 @@ def _safe_days_between(date1, date2) -> int | None:
 # =======================================================
 # 🧩  CORE COMPUTATIONS (PER-UNIT)
 # =======================================================
-def compute_days_vacant(row: pd.Series) -> int | None:
+def compute_days_vacant(row: pd.Series, today: object | None = None) -> int | None:
     """Days since move-out (vacancy age)."""
     move_out = row.get("move_out")
-    return _safe_days_between(_today(), move_out)
+    return _safe_days_between(_norm_today(today), move_out)
 
 
-def compute_days_to_be_ready(row: pd.Series) -> int | None:
+def compute_days_to_be_ready(row: pd.Series, today: object | None = None) -> int | None:
     """Days remaining until scheduled move-in."""
     move_in = row.get("move_in")
-    return _safe_days_between(move_in, _today())
+    return _safe_days_between(move_in, _norm_today(today))
 
 
 def compute_turn_level(row: pd.Series) -> str:
@@ -111,7 +121,7 @@ def compute_lifecycle_label(row: pd.Series) -> str:
     return "Not Ready"
 
 
-def compute_nvm_status(row: pd.Series) -> str:
+def compute_nvm_status(row: pd.Series, today: object | None = None) -> str:
     """
     Compute NVM status based on Move-Out/Move-In dates and TODAY().
     
@@ -129,7 +139,7 @@ def compute_nvm_status(row: pd.Series) -> str:
     Returns:
         NVM status string
     """
-    today = _today()
+    today = _norm_today(today)
     
     move_out = pd.to_datetime(row.get('move_out'), errors='coerce')
     move_in = pd.to_datetime(row.get('move_in'), errors='coerce')
@@ -164,7 +174,7 @@ def compute_nvm_status(row: pd.Series) -> str:
 # =======================================================
 # 🧩  AGGREGATION WRAPPER
 # =======================================================
-def compute_all_unit_fields(df_units: pd.DataFrame) -> pd.DataFrame:
+def compute_all_unit_fields(df_units: pd.DataFrame, today: object | None = None) -> pd.DataFrame:
     """
     Apply all per-unit computations and return
     enriched DataFrame ready for metrics.
@@ -184,12 +194,14 @@ def compute_all_unit_fields(df_units: pd.DataFrame) -> pd.DataFrame:
             df[col] = pd.to_datetime(df[col], errors="coerce")
 
     # Derived columns
-    df["days_vacant"] = df.apply(compute_days_vacant, axis=1)  # type: ignore
-    df["days_to_be_ready"] = df.apply(compute_days_to_be_ready, axis=1)  # type: ignore
+    t = _norm_today(today)
+
+    df["days_vacant"] = df.apply(lambda r: compute_days_vacant(r, today=t), axis=1)  # type: ignore
+    df["days_to_be_ready"] = df.apply(lambda r: compute_days_to_be_ready(r, today=t), axis=1)  # type: ignore
     df["turn_level"] = df.apply(compute_turn_level, axis=1)  # type: ignore
     df["unit_blocked"] = df.apply(compute_unit_blocked, axis=1)  # type: ignore
     df["lifecycle_label"] = df.apply(compute_lifecycle_label, axis=1)  # type: ignore
-    df["nvm"] = df.apply(compute_nvm_status, axis=1)  # type: ignore - COMPUTED NVM STATUS
+    df["nvm"] = df.apply(lambda r: compute_nvm_status(r, today=t), axis=1)  # type: ignore - COMPUTED NVM STATUS
 
     log_event("INFO", f"Computed derived fields for {len(df)} units (including NVM status).")
     return df

@@ -54,7 +54,9 @@ try:
     }
     units_df = units_df.rename(columns=column_mapping)
     # Compute all derived fields including NVM status
-    units_df = compute_all_unit_fields(units_df)
+    # Use a single, consistent 'today' for derived computations on this page
+    today_ref = datetime.now().date()
+    units_df = compute_all_unit_fields(units_df, today=today_ref)
     # Rename back for compatibility (nvm is computed, stays lowercase)
     units_df = units_df.rename(columns={
         'move_out': 'Move-out',
@@ -224,7 +226,7 @@ move_activity_section = create_simple_section(
 # Prepare context
 move_context = {
     'units_df': units_df,
-    'today': datetime.now().date()
+    'today': today_ref
 }
 
 # Render Move Activity section
