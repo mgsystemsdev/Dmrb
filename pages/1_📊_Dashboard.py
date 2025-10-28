@@ -310,24 +310,17 @@ with st.expander(f"📋 View All Units ({len(all_units)} total)", expanded=False
             st.divider()
 
 render_section_container_end()
-# --- All Units with moving dates only, sorted by closest move date (ascending) ---
-render_section_container_start("All Units SMI", "📋")
+# --- All Units with Move-in dates only, sorted by Move-in (ascending - soonest first) ---
+render_section_container_start("All Units moving dates", "📋")
 
-# Filter units with move dates and sort by closest move date
-units_with_moves = units_df[
-    (pd.notna(units_df['Move-out'])) | (pd.notna(units_df['Move-in']))
-].copy()
+# Filter units with Move-in dates only
+units_with_movein = units_df[pd.notna(units_df['Move-in'])].copy()
 
-# Calculate closest move date for sorting
-units_with_moves['move_out_dt'] = pd.to_datetime(units_with_moves['Move-out'], errors='coerce')
-units_with_moves['move_in_dt'] = pd.to_datetime(units_with_moves['Move-in'], errors='coerce')
-units_with_moves['closest_move'] = units_with_moves[['move_out_dt', 'move_in_dt']].min(axis=1)
-
-# Sort by closest move date (ascending - soonest first)
-units_with_moves = units_with_moves.sort_values('closest_move', na_position='last')
+# Sort by Move-in date (ascending - soonest first)
+units_with_movein = units_with_movein.sort_values('Move-in', na_position='last')
 
 # Build unit list
-all_units = build_all_units(units_with_moves)
+all_units = build_all_units(units_with_movein)
 
 with st.expander(f"📋 View All Units ({len(all_units)} total)", expanded=False):
     for idx, unit in enumerate(all_units):
