@@ -151,6 +151,7 @@ def build_all_units(units_df: pd.DataFrame) -> List[Dict[str, Any]]:
             'move_in_str': move_in_str,
             'days_to_be_ready': dr if dr is not None else '—',
             'nvm': row.get('nvm', '—'),
+            'lifecycle_label': row.get('lifecycle_label', 'Not Ready'),
         })
 
     # Sort by days vacant (descending - oldest first)

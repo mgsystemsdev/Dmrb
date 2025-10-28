@@ -11,19 +11,28 @@ from utils.constants import NVM_EMOJI_MAP
 
 def render_unit_row(unit: dict) -> None:
     """
-    Render a single, compact unit row with Nvm at the end.
+    Render a single, compact unit row with Nvm and Lifecycle Status.
 
     Args:
         unit: Dictionary with keys: unit_num, status_emoji, move_out_str, days_vacant,
-              move_in_str, days_to_be_ready, nvm
+              move_in_str, days_to_be_ready, nvm, lifecycle_label
     """
     nvm_text = unit.get('nvm', '—')
     nvm_normalized = str(nvm_text).lower().strip()
     nvm_emoji = NVM_EMOJI_MAP.get(nvm_normalized, '🟢')
-    
+
+    # Lifecycle status emoji mapping
+    lifecycle_label = unit.get('lifecycle_label', 'Not Ready')
+    lifecycle_emoji_map = {
+        'Ready': '✅',
+        'In Turn': '🔧',
+        'Not Ready': '⚠️'
+    }
+    lifecycle_emoji = lifecycle_emoji_map.get(lifecycle_label, '⚠️')
+
     st.markdown(f"""
 <div class='unit-card'>
-  <div class='row-grid' style='grid-template-columns: 1.1fr 1fr 0.9fr 1fr 0.9fr 1fr;'>
+  <div class='row-grid' style='grid-template-columns: 1.1fr 1fr 0.9fr 1fr 0.9fr 1fr 1fr;'>
     <div>
       <div class='meta-value'>{unit['unit_num']}</div>
     </div>
@@ -46,6 +55,10 @@ def render_unit_row(unit: dict) -> None:
     <div style='text-align:center;'>
       <div class='meta-label'>Nvm</div>
       <div class='meta-value'>{nvm_emoji} {nvm_text}</div>
+    </div>
+    <div style='text-align:center;'>
+      <div class='meta-label'>Lifecycle Status</div>
+      <div class='meta-value'>{lifecycle_emoji} {lifecycle_label}</div>
     </div>
   </div>
 </div>
