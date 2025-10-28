@@ -41,6 +41,7 @@ def build_enhanced_unit(row: pd.Series, tasks_df: pd.DataFrame) -> dict:
         'days_to_ready': days_to_ready_str,
         'days_to_be_ready': days_to_ready_str,  # Compatible key
         'readiness_pct': readiness_pct,
-        'nvm': row.get('nvm', '—')
+        'nvm': row.get('nvm', '—'),
+        'lifecycle_label': lifecycle  # Add lifecycle_label for render_unit_row
     }
 

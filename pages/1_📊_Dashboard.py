@@ -182,7 +182,8 @@ def render_move_outs_today(context):
                 'days_vacant': '—',
                 'move_in_str': '—',
                 'days_to_be_ready': '—',
-                'nvm': row.get('Nvm', '—')
+                'nvm': row.get('Nvm', '—'),
+                'lifecycle_label': row.get('lifecycle_label', 'Not Ready')
             }
             render_unit_row(unit)
     else:
@@ -209,7 +210,8 @@ def render_move_ins_tomorrow(context):
                 'days_vacant': '—',
                 'move_in_str': move_in_date.strftime('%m/%d/%y') if pd.notna(move_in_date) else '—',
                 'days_to_be_ready': '—',
-                'nvm': row.get('Nvm', '—')
+                'nvm': row.get('Nvm', '—'),
+                'lifecycle_label': row.get('lifecycle_label', 'Not Ready')
             }
             render_unit_row(unit)
     else:
