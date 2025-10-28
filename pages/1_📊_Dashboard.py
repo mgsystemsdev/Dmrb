@@ -175,13 +175,14 @@ def render_move_outs_today(context):
     if len(move_outs) > 0:
         for _, row in move_outs.iterrows():
             move_out_date = pd.to_datetime(row.get('Move-out'), errors='coerce')
+            move_in_date = pd.to_datetime(row.get('Move-in'), errors='coerce')
             unit = {
                 'unit_num': str(row.get('Unit id', '')),
                 'status_emoji': '🔴',  # Red - still occupied
                 'move_out_str': move_out_date.strftime('%m/%d/%y') if pd.notna(move_out_date) else '—',
-                'days_vacant': '—',
-                'move_in_str': '—',
-                'days_to_be_ready': '—',
+                'days_vacant': row.get('days_vacant', '—'),
+                'move_in_str': move_in_date.strftime('%m/%d/%y') if pd.notna(move_in_date) else '—',
+                'days_to_be_ready': row.get('days_to_be_ready', '—'),
                 'nvm': row.get('nvm', '—'),
                 'lifecycle_label': row.get('lifecycle_label', 'Not Ready')
             }
@@ -203,13 +204,14 @@ def render_move_ins_tomorrow(context):
     if len(move_ins) > 0:
         for _, row in move_ins.iterrows():
             move_in_date = pd.to_datetime(row.get('Move-in'), errors='coerce')
+            move_out_date = pd.to_datetime(row.get('Move-out'), errors='coerce')
             unit = {
                 'unit_num': str(row.get('Unit id', '')),
                 'status_emoji': '🔴',  # Red - moving in (occupied)
-                'move_out_str': '—',
-                'days_vacant': '—',
+                'move_out_str': move_out_date.strftime('%m/%d/%y') if pd.notna(move_out_date) else '—',
+                'days_vacant': row.get('days_vacant', '—'),
                 'move_in_str': move_in_date.strftime('%m/%d/%y') if pd.notna(move_in_date) else '—',
-                'days_to_be_ready': '—',
+                'days_to_be_ready': row.get('days_to_be_ready', '—'),
                 'nvm': row.get('nvm', '—'),
                 'lifecycle_label': row.get('lifecycle_label', 'Not Ready')
             }
@@ -300,6 +302,32 @@ st.divider()
 render_section_container_start("All Units", "📋")
 
 all_units = build_all_units(units_df)
+
+with st.expander(f"📋 View All Units ({len(all_units)} total)", expanded=False):
+    for idx, unit in enumerate(all_units):
+        render_unit_row(unit)
+        if idx < len(all_units) - 1:
+            st.divider()
+
+render_section_container_end()
+# --- All Units with moving dates only, sorted by closest move date (ascending) ---
+render_section_container_start("All Units", "📋")
+
+# Filter units with move dates and sort by closest move date
+units_with_moves = units_df[
+    (pd.notna(units_df['Move-out'])) | (pd.notna(units_df['Move-in']))
+].copy()
+
+# Calculate closest move date for sorting
+units_with_moves['move_out_dt'] = pd.to_datetime(units_with_moves['Move-out'], errors='coerce')
+units_with_moves['move_in_dt'] = pd.to_datetime(units_with_moves['Move-in'], errors='coerce')
+units_with_moves['closest_move'] = units_with_moves[['move_out_dt', 'move_in_dt']].min(axis=1)
+
+# Sort by closest move date (ascending - soonest first)
+units_with_moves = units_with_moves.sort_values('closest_move', na_position='last')
+
+# Build unit list
+all_units = build_all_units(units_with_moves)
 
 with st.expander(f"📋 View All Units ({len(all_units)} total)", expanded=False):
     for idx, unit in enumerate(all_units):
