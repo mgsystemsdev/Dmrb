@@ -311,7 +311,7 @@ with st.expander(f"📋 View All Units ({len(all_units)} total)", expanded=False
 
 render_section_container_end()
 # --- All Units with moving dates only, sorted by closest move date (ascending) ---
-render_section_container_start("All Units", "📋")
+render_section_container_start("All Units SMI", "📋")
 
 # Filter units with move dates and sort by closest move date
 units_with_moves = units_df[
