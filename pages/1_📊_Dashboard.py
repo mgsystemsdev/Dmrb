@@ -176,7 +176,7 @@ def render_move_outs_today(context):
         for _, row in move_outs.iterrows():
             move_out_date = pd.to_datetime(row.get('Move-out'), errors='coerce')
             unit = {
-                'unit_num': str(row.get('Unit', '')),
+                'unit_num': str(row.get('Unit id', '')),
                 'status_emoji': '🔴',  # Red - still occupied
                 'move_out_str': move_out_date.strftime('%m/%d/%y') if pd.notna(move_out_date) else '—',
                 'days_vacant': '—',
@@ -204,7 +204,7 @@ def render_move_ins_tomorrow(context):
         for _, row in move_ins.iterrows():
             move_in_date = pd.to_datetime(row.get('Move-in'), errors='coerce')
             unit = {
-                'unit_num': str(row.get('Unit', '')),
+                'unit_num': str(row.get('Unit id', '')),
                 'status_emoji': '🔴',  # Red - moving in (occupied)
                 'move_out_str': '—',
                 'days_vacant': '—',
